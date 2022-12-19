@@ -12,6 +12,10 @@ public class Logger {
         System.out.println(message);
     }
 
+    static void log(Integer message) {
+        System.out.println(message);
+    }
+
     static void log(BigInteger message) {
         System.out.println(message);
     }
