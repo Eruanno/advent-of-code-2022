@@ -1,10 +1,7 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,9 +13,10 @@ public class Day16 implements Day {
     private final Pattern pressurePattern = Pattern.compile("-?\\d+");
     private final Pattern valvesPattern = Pattern.compile("[A-Z][A-Z]");
 
-    private String filename = "day-16-test";
+    private String filename = "day-16";
     private List<String> input;
-    private final List<Valve> graph = new ArrayList<>();
+    private final Map<String, List<String>> tunnelsGraph = new HashMap<>();
+    private final Map<String, Integer> pressureValues = new HashMap<>();
 
     public void solve() throws IOException {
         loadInput();
@@ -46,7 +44,8 @@ public class Day16 implements Day {
             while (valvesMatcher.find()) {
                 tunnels.add(valvesMatcher.group(0));
             }
-            graph.add(new Valve(label, pressure, false, tunnels));
+            tunnelsGraph.put(label, tunnels);
+            pressureValues.put(label, pressure);
         }
     }
 
@@ -54,91 +53,75 @@ public class Day16 implements Day {
         this.filename = filename;
     }
 
-    Long calculateFirstStar() {
-        Valve valve = graph.get(0);
-        long totalPressure = 0;
-        long accPressure = 0;
-        valve.opened = true;
-        for (int m = 0; m < 30; m++) {
-            if (!valve.opened) {
-                log("Opening valve " + valve.label);
-                valve.opened = true;
-                accPressure += valve.pressure;
-            } else {
-                Optional<Valve> next = findNextValve(valve.tunnels);
-                if (next.isPresent()) {
-                    valve = next.get();
-                }
-                log("Moving to valve " + valve.label);
-            }
-            log("Releasing pressure : " + accPressure);
-            totalPressure += accPressure;
-        }
-        return totalPressure;
+    private record DequeValve(String label, String openedValves, int time, long incPressure, long releasedPressure) {
     }
 
-    private Optional<Valve> findNextValve(List<String> tunnels) {
-        boolean everythingIsOpened = graph.stream().filter(Valve::isOpened).toList().size() == graph.size();
-        if (everythingIsOpened) {
-            return Optional.empty();
+    // 1704 - 1804
+    // not 1718, 1815
+    Long calculateFirstStar() {
+        long i = 0;
+        List<DequeValve> timesUp = new ArrayList<>();
+        for (int time = 10; time < 30; time++) {
+            Deque<DequeValve> toVisit = new ArrayDeque<>();
+            timesUp = new ArrayList<>();
+            toVisit.add(new DequeValve("AA", "AA", 0, 0, 0));
+            while (!toVisit.isEmpty()) {
+                i++;
+                DequeValve valve = toVisit.pop();
+                if ((valve.time > 10 && valve.releasedPressure < 97) //197
+                        //||(valve.time > 11 && valve.releasedPressure < 145) //245
+                        //||(valve.time > 12 && valve.releasedPressure < 193) //293
+                        //||(valve.time > 13 && valve.releasedPressure < 241)//341
+                        //||(valve.time > 14 && valve.releasedPressure < 305)//405
+                        ||(valve.time > 15 && valve.releasedPressure < 369)//469
+                        //||(valve.time > 16 && valve.releasedPressure < 433)//533
+                        //||(valve.time > 17 && valve.releasedPressure < 519)//619
+                        //||(valve.time > 18 && valve.releasedPressure < 605)//705
+                        //||(valve.time > 19 && valve.releasedPressure < 691)//791
+                        //||(valve.time > 20 && valve.releasedPressure < 777)//877
+                        //||(valve.time > 21 && valve.releasedPressure < 863)//963
+                        ||(valve.time > 22 && valve.releasedPressure < 949)//1049
+                        //|| (valve.time > 23 && valve.releasedPressure < 1035)
+                        //|| (valve.time > 24 && valve.releasedPressure < 1121)
+                        //|| (valve.time > 25 && valve.releasedPressure < 1207)
+                        || (valve.time > 26 && valve.releasedPressure < 1293)//1393
+                        //|| (valve.time > 27 && valve.releasedPressure < 1382)
+                        //|| (valve.time > 28 && valve.releasedPressure < 1493)
+                        //|| (valve.time > 29 && valve.releasedPressure < 1604)
+                ) {
+                    continue;
+                }
+                /*
+                 * test data
+                 * if ((valve.time > 10 && valve.releasedPressure < 200) ||
+                 *(valve.time > 13 && valve.releasedPressure < 350) ||
+                 *(valve.time > 16 && valve.releasedPressure < 500) ||
+                 *(valve.time > 19 && valve.releasedPressure < 750) ||
+                 *(valve.time > 22 && valve.releasedPressure < 950) ||
+                 *(valve.time > 25 && valve.releasedPressure < 1200)) {
+                 *continue;
+                 *}
+                 */
+                if (valve.time > time) {
+                    timesUp.add(valve);
+                } else {
+                    if (!valve.openedValves.contains(valve.label)) {
+                        long relPressure = valve.releasedPressure + valve.incPressure;
+                        long incPressure = valve.incPressure + pressureValues.get(valve.label);
+                        toVisit.add(new DequeValve(valve.label, valve.openedValves + "," + valve.label, valve.time + 1, incPressure, relPressure));
+                    }
+                    for (String tunnel : tunnelsGraph.get(valve.label)) {
+                        toVisit.add(new DequeValve(tunnel, valve.openedValves, valve.time + 1, valve.incPressure, valve.releasedPressure + valve.incPressure));
+                    }
+                }
+            }
+            long value =  timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
+            log("Time: %d\t%d".formatted(time, value));
         }
-        List<Valve> neighbours = tunnels.stream()
-                                        .map(tunnel -> graph.stream()
-                                                            .filter(valve -> valve.label.equals(tunnel))
-                                                            .findFirst()
-                                                            .get())
-                                        .toList();
-        Optional<Valve> maxPressureNotOpenedValve = Optional.empty();
-        for (Valve v : neighbours) {
-            if (v.isOpened()) {
-                continue;
-            }
-            if (maxPressureNotOpenedValve.isEmpty()) {
-                maxPressureNotOpenedValve = Optional.of(v);
-            }
-            if (maxPressureNotOpenedValve.get().pressure < v.pressure) {
-                maxPressureNotOpenedValve = Optional.of(v);
-            }
-        }
-        return maxPressureNotOpenedValve;
+        return timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
     }
 
     Long calculateSecondStar() {
         return -1L;
-    }
-
-    private class Valve {
-        private final String label;
-        private final int pressure;
-        private boolean opened;
-        private List<String> tunnels;
-
-        Valve(String label, int pressure, boolean opened, List<String> tunnels) {
-            this.label = label;
-            this.pressure = pressure;
-            this.opened = opened;
-            this.tunnels = tunnels;
-        }
-
-        boolean isOpened() {
-            return opened;
-        }
-
-        List<String> getTunnels() {
-            return tunnels;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Valve valve = (Valve) o;
-            return pressure == valve.pressure && Objects.equals(label, valve.label);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(label, pressure);
-        }
     }
 }
