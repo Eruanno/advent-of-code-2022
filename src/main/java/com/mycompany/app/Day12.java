@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.Comparator.comparingInt;
 
 public class Day12 implements Day {
@@ -18,16 +17,20 @@ public class Day12 implements Day {
     private int height = 0;
     private int width = 0;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-12");
-        prepareData(input);
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day12(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         height = input.size();
         width = input.get(0).length();
         map = new char[height][];
@@ -54,12 +57,14 @@ public class Day12 implements Day {
         }
     }
 
-    private Long calculateFirstStar() {
-        return findNumberOfStepsFrom(startingPoint);
+    @Override
+    public String calculateFirstStar() {
+        return "" + findNumberOfStepsFrom(startingPoint);
     }
 
-    private Long calculateSecondStar() {
-        return allStartingPoints.stream().map(this::findNumberOfStepsFrom).min(Long::compareTo).orElse(-1L);
+    @Override
+    public String calculateSecondStar() {
+        return "" + allStartingPoints.stream().map(this::findNumberOfStepsFrom).min(Long::compareTo).orElse(-1L);
     }
 
     private long findNumberOfStepsFrom(Point point) {

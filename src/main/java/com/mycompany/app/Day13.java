@@ -5,19 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 
 public class Day13 implements Day {
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-13");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar(input));
+    private final String filename;
+    private List<String> input;
+
+    public Day13(String filename) {
+        this.filename = filename;
     }
 
-    private Long calculateFirstStar(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+    }
+
+    @Override
+    public String calculateFirstStar() {
         String left = "";
         String right = "";
         long sumOfIndicesInRightOrder = 0;
@@ -36,17 +40,18 @@ public class Day13 implements Day {
                 right = "";
             }
         }
-        return sumOfIndicesInRightOrder;
+        return "" + sumOfIndicesInRightOrder;
     }
 
-    private Long calculateSecondStar(List<String> input) {
+    @Override
+    public String calculateSecondStar() {
         input.add("[[2]]");
         input.add("[[6]]");
         List<String> sortedInput = input.stream()
                                         .filter(p -> !p.isBlank())
                                         .sorted(this::reverse)
                                         .toList();
-        return (sortedInput.indexOf("[[2]]") + 1L) * (sortedInput.indexOf("[[6]]") + 1L);
+        return "" + (sortedInput.indexOf("[[2]]") + 1L) * (sortedInput.indexOf("[[6]]") + 1L);
     }
 
     private int reverse(String left, String right) {

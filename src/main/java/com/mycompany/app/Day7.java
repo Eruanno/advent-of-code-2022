@@ -7,24 +7,26 @@ import java.util.List;
 import static com.mycompany.app.Day7.Type.DIR;
 import static com.mycompany.app.Day7.Type.FILE;
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Math.min;
 
 class Day7 implements Day {
 
     private Node root;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-7");
-        prepareData(input);
-        log("Day 7:");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day7(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         // Create tree.
         root = new Node(new FileNode(DIR, "/", -1), null, new ArrayList<>());
         Node currentNode = root;
@@ -61,8 +63,9 @@ class Day7 implements Day {
         return currentNode.data.size;
     }
 
-    private Long calculateFirstStar(List<String> input) {
-        return root.children.stream().mapToLong(this::calculateDirectorySize).sum();
+    @Override
+    public String calculateFirstStar() {
+        return "" + root.children.stream().mapToLong(this::calculateDirectorySize).sum();
     }
 
     private long calculateDirectorySize(Node currentNode) {
@@ -78,15 +81,16 @@ class Day7 implements Day {
         return acc;
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         long totalDiscSpace = 70_000_000;
         long updateSize = 30_000_000;
         long occupiedSpace = root.data.size;
         long neededSpace = occupiedSpace - (totalDiscSpace - updateSize);
-        return root.children.stream()
-                            .mapToLong(node -> findSmallestDirectoryToDelete(node, neededSpace))
-                            .min()
-                            .orElse(-1L);
+        return "" + root.children.stream()
+                                 .mapToLong(node -> findSmallestDirectoryToDelete(node, neededSpace))
+                                 .min()
+                                 .orElse(-1L);
     }
 
     private long findSmallestDirectoryToDelete(Node currentNode, long size) {

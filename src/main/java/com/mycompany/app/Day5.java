@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
@@ -58,17 +57,20 @@ class Day5 implements Day {
 
     private List<Operation> operations;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-5");
-        prepareData(input);
-        log("Day 5:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day5(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         operations = input.stream().map(this::resolveOperation).toList();
     }
 
@@ -83,7 +85,8 @@ class Day5 implements Day {
         return new Operation(quantity, from, to);
     }
 
-    private String calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         resetStacks();
         for (Operation operation : operations) {
             for (int i = 0; i < operation.quantity; i++) {
@@ -93,7 +96,8 @@ class Day5 implements Day {
         return stream(stacks).sequential().map(Deque::peekLast).collect(joining());
     }
 
-    private String calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         resetStacks();
         for (Operation operation : operations) {
             Deque<String> tempDeque = new ArrayDeque<>();

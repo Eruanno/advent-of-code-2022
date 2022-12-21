@@ -13,22 +13,20 @@ public class Day16 implements Day {
     private final Pattern pressurePattern = Pattern.compile("-?\\d+");
     private final Pattern valvesPattern = Pattern.compile("[A-Z][A-Z]");
 
-    private String filename = "day-16";
-    private List<String> input;
     private final Map<String, List<String>> tunnelsGraph = new HashMap<>();
     private final Map<String, Integer> pressureValues = new HashMap<>();
 
-    public void solve() throws IOException {
-        loadInput();
-        prepareData();
-        log("First star:");
-        log(calculateFirstStar()); // 1651
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day16(String filename) {
+        this.filename = filename;
     }
 
-    void loadInput() throws IOException {
+    @Override
+    public void loadData() throws IOException {
         input = readInput(filename);
+        prepareData();
     }
 
     void prepareData() {
@@ -49,16 +47,13 @@ public class Day16 implements Day {
         }
     }
 
-    void setFilename(String filename) {
-        this.filename = filename;
-    }
-
     private record DequeValve(String label, String openedValves, int time, long incPressure, long releasedPressure) {
     }
 
     // 1704 - 1804
     // not 1718, 1815
-    Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         long i = 0;
         List<DequeValve> timesUp = new ArrayList<>();
         for (int time = 10; time < 30; time++) {
@@ -73,21 +68,21 @@ public class Day16 implements Day {
                         //||(valve.time > 12 && valve.releasedPressure < 193) //293
                         //||(valve.time > 13 && valve.releasedPressure < 241)//341
                         //||(valve.time > 14 && valve.releasedPressure < 305)//405
-                        ||(valve.time > 15 && valve.releasedPressure < 369)//469
+                        || (valve.time > 15 && valve.releasedPressure < 369)//469
                         //||(valve.time > 16 && valve.releasedPressure < 433)//533
                         //||(valve.time > 17 && valve.releasedPressure < 519)//619
                         //||(valve.time > 18 && valve.releasedPressure < 605)//705
                         //||(valve.time > 19 && valve.releasedPressure < 691)//791
                         //||(valve.time > 20 && valve.releasedPressure < 777)//877
                         //||(valve.time > 21 && valve.releasedPressure < 863)//963
-                        ||(valve.time > 22 && valve.releasedPressure < 949)//1049
+                        || (valve.time > 22 && valve.releasedPressure < 949)//1049
                         //|| (valve.time > 23 && valve.releasedPressure < 1035)
                         //|| (valve.time > 24 && valve.releasedPressure < 1121)
                         //|| (valve.time > 25 && valve.releasedPressure < 1207)
                         || (valve.time > 26 && valve.releasedPressure < 1293)//1393
-                        //|| (valve.time > 27 && valve.releasedPressure < 1382)
-                        //|| (valve.time > 28 && valve.releasedPressure < 1493)
-                        //|| (valve.time > 29 && valve.releasedPressure < 1604)
+                    //|| (valve.time > 27 && valve.releasedPressure < 1382)
+                    //|| (valve.time > 28 && valve.releasedPressure < 1493)
+                    //|| (valve.time > 29 && valve.releasedPressure < 1604)
                 ) {
                     continue;
                 }
@@ -118,10 +113,11 @@ public class Day16 implements Day {
             long value = timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
             log("Time: %d\t%d".formatted(time, value));
         }
-        return timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
+        return "" + timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
     }
 
-    Long calculateSecondStar() {
-        return -1L;
+    @Override
+    public String calculateSecondStar() {
+        return "";
     }
 }

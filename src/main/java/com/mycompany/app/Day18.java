@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.max;
 
@@ -14,17 +13,20 @@ public class Day18 implements Day {
     private int[][][] droplet;
     private int dimension = 0;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-18");
-        prepareData(input);
-        log("Day 18:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day18(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         for (String line : input) {
             String[] coordinates = line.split(",");
             scanned.add(new Scan(parseInt(coordinates[0]), parseInt(coordinates[1]), parseInt(coordinates[2])));
@@ -45,7 +47,8 @@ public class Day18 implements Day {
         }
     }
 
-    private Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         long acc = 0;
         for (int x = 0; x < dimension; x++) {
             for (int y = 0; y < dimension; y++) {
@@ -56,7 +59,7 @@ public class Day18 implements Day {
                 }
             }
         }
-        return acc;
+        return "" + acc;
     }
 
     /**
@@ -96,7 +99,8 @@ public class Day18 implements Day {
         return acc;
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         // Mark bottom
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
@@ -160,7 +164,7 @@ public class Day18 implements Day {
                 }
             }
         }
-        return acc;
+        return "" + acc;
     }
 
     private boolean adjAir(int x, int y, int z) {

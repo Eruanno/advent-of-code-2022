@@ -5,24 +5,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.Comparator.reverseOrder;
 
 class Day1 implements Day {
 
     private final List<Long> totalCalories = new ArrayList<>();
+    private final String filename;
+    private List<String> input;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-1");
-        prepareData(input);
-        log("Day 1:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    public Day1(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         List<Long> calories = new ArrayList<>();
         for (String line : input) {
             if (line.isEmpty()) {
@@ -34,12 +35,14 @@ class Day1 implements Day {
         }
     }
 
-    private Long calculateFirstStar() {
-        return totalCalories.stream().max(Long::compareTo).orElse(-1L);
+    @Override
+    public String calculateFirstStar() {
+        return "" + totalCalories.stream().max(Long::compareTo).orElse(-1L);
     }
 
-    private Long calculateSecondStar() {
-        return totalCalories.stream()
+    @Override
+    public String calculateSecondStar() {
+        return "" + totalCalories.stream()
                                  .sorted(reverseOrder())
                                  .limit(3)
                                  .mapToLong(Long::valueOf)

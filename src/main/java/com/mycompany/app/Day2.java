@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 
 class Day2 implements Day {
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-2");
-        log("Day 2:");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar(input));
+    private final String filename;
+    private List<String> input;
+
+    public Day2(String filename) {
+        this.filename = filename;
+    }
+
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
     }
 
     /**
@@ -22,7 +24,8 @@ class Day2 implements Day {
      * B, Y for Paper
      * C, Z for Scissors
      */
-    private Long calculateFirstStar(List<String> input) {
+    @Override
+    public String calculateFirstStar() {
         long totalPoints = 0;
         for (String game : input) {
             switch (game) {
@@ -39,7 +42,7 @@ class Day2 implements Day {
                 }
             }
         }
-        return totalPoints;
+        return "" + totalPoints;
     }
 
     /**
@@ -50,7 +53,8 @@ class Day2 implements Day {
      * Y draw - 3
      * Z win - 6
      */
-    private Long calculateSecondStar(List<String> input) {
+    @Override
+    public String calculateSecondStar() {
         long totalPoints = 0;
         for (String game : input) {
             switch (game) {
@@ -67,6 +71,6 @@ class Day2 implements Day {
                 }
             }
         }
-        return totalPoints;
+        return "" + totalPoints;
     }
 }

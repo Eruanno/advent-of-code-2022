@@ -4,21 +4,24 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Character.isUpperCase;
 
 class Day3 implements Day {
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-3");
-        log("Day 3:");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar(input));
+    private final String filename;
+    private List<String> input;
+
+    public Day3(String filename) {
+        this.filename = filename;
     }
 
-    private Long calculateFirstStar(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+    }
+
+    @Override
+    public String calculateFirstStar() {
         long totalPriority = 0;
         for (String rucksack : input) {
             String compartmentA = rucksack.substring(0, (rucksack.length()) / 2);
@@ -34,10 +37,11 @@ class Day3 implements Day {
             }
             totalPriority += resolvePriority(priorityLetter);
         }
-        return totalPriority;
+        return "" + totalPriority;
     }
 
-    private Long calculateSecondStar(List<String> input) {
+    @Override
+    public String calculateSecondStar() {
         long totalPriority = 0;
         for (int g = 0; g < input.size() - 2; g += 3) {
             String rucksackA = input.get(g);
@@ -56,7 +60,7 @@ class Day3 implements Day {
             }
             totalPriority += resolvePriority(priorityLetter);
         }
-        return totalPriority;
+        return "" + totalPriority;
     }
 
     private int resolvePriority(char character) {

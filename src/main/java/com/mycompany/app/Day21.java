@@ -14,17 +14,20 @@ public class Day21 implements Day {
 
     Map<String, Monkey> monkeys = new HashMap<>();
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-21");
-        prepareData(input);
-        log("Day 21:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day21(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         for (String line : input) {
             String[] parts = line.split(" ");
             String name = parts[0].substring(0, 4);
@@ -37,8 +40,9 @@ public class Day21 implements Day {
         }
     }
 
-    private Long calculateFirstStar() {
-        return returnValue("root");
+    @Override
+    public String calculateFirstStar() {
+        return "" + returnValue("root");
     }
 
     private long returnValue(String name) {
@@ -58,7 +62,8 @@ public class Day21 implements Day {
         return result;
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         Monkey root = monkeys.remove("root");
         monkeys.put("root", new Monkey("root", null, "=", root.nameA, root.nameB));
         preCalcValues("root");
@@ -73,7 +78,7 @@ public class Day21 implements Day {
         } else {
             number = returnValueReversed(b.value, a.name);
         }
-        return number.longValue();
+        return number.toString();
     }
 
     private Result preCalcValues(String name) {

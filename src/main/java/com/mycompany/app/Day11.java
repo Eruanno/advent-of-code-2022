@@ -6,25 +6,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.Arrays.stream;
 
 public class Day11 implements Day {
     private static final Pattern p = Pattern.compile("\\d+");
     private Monkey[] monkeys;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-11");
-        prepareData(input);
-        log("Day 11:");
-        log("First star:");
-        log(calculateFirstStar());
-        prepareData(input);
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day11(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         int id = -1;
         ArrayDeque<Long> items = new ArrayDeque<>();
         Operation operation = new Operation('-', 1L);
@@ -74,18 +75,20 @@ public class Day11 implements Day {
         monkeys = monkeyList.toArray(new Monkey[0]);
     }
 
-    private Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         return calc(20, true, 3);
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         long divisor = stream(monkeys)
                 .map(m -> m.divisor)
                 .reduce(1L, (a, b) -> a * b);
         return calc(10000, false, divisor);
     }
 
-    private Long calc(int iterations, boolean division, long divisor) {
+    private String calc(int iterations, boolean division, long divisor) {
         for (int i = 0; i < iterations; i++) {
             for (Monkey monkey : monkeys) {
                 while (!monkey.items.isEmpty()) {
@@ -110,7 +113,7 @@ public class Day11 implements Day {
                 }
             }
         }
-        return stream(monkeys)
+        return "" + stream(monkeys)
                 .map(m -> m.inspections)
                 .sorted(Comparator.reverseOrder())
                 .limit(2)

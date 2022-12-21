@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
 import static com.mycompany.app.Logger.log;
@@ -21,17 +20,20 @@ public class Day17 implements Day {
     private int shape = 0;
     private List<List<IPoint>> shapes = new ArrayList<>();
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-17-test");
-        prepareData(input);
-        log("Day 17:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day17(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         jets = input.get(0);
 
         List<IPoint> shapeA = new ArrayList<>();
@@ -72,11 +74,17 @@ public class Day17 implements Day {
         shapes.add(shapeE);
     }
 
-    private Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         return calculate(2022);
     }
 
-    private Long calculate(long numberOfRocks) {
+    @Override
+    public String calculateSecondStar() {
+        return calculate(1_000_000_000_000L);
+    }
+
+    private String calculate(long numberOfRocks) {
         List<Point> shape = getNextShape();
         int shapeX = 2;
         int shapeY = (int) (highestFloor + 3);
@@ -106,7 +114,7 @@ public class Day17 implements Day {
                 moveDown = false;
             }
         }
-        return highestFloor;
+        return "" + highestFloor;
     }
 
     private void findPattern() {
@@ -202,10 +210,6 @@ public class Day17 implements Day {
             jet = (jet + 1) % jets.length();
             return move;
         }
-    }
-
-    private Long calculateSecondStar() {
-        return calculate(1_000_000_000_000L);
     }
 
     private static class Point {

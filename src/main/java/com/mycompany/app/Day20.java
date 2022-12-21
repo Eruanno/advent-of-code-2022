@@ -5,26 +5,26 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Integer.parseInt;
 
 public class Day20 implements Day {
 
-    private List<String> input;
     private long[][] encryptedFile;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-20");
-        prepareData(input);
-        log("Day 20:");
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day20(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
-        this.input = input;
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         encryptedFile = new long[input.size()][2];
     }
 
@@ -35,13 +35,15 @@ public class Day20 implements Day {
         }
     }
 
-    private Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         resetData(1L);
         mixFile();
         return calculateCoordinates();
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         resetData(811589153L);
         IntStream.range(0, 10).forEach(i -> mixFile());
         return calculateCoordinates();
@@ -67,7 +69,7 @@ public class Day20 implements Day {
         }
     }
 
-    private long calculateCoordinates() {
+    private String calculateCoordinates() {
         int index = -1;
         for (int i = 0; i < encryptedFile.length; i++) {
             if (encryptedFile[i][0] == 0) {
@@ -77,7 +79,7 @@ public class Day20 implements Day {
         long ONE = encryptedFile[((1000 % encryptedFile.length) + index) % encryptedFile.length][0];
         long TWO = encryptedFile[((2000 % encryptedFile.length) + index) % encryptedFile.length][0];
         long THREE = encryptedFile[((3000 % encryptedFile.length) + index) % encryptedFile.length][0];
-        return ONE + TWO + THREE;
+        return "" + (ONE + TWO + THREE);
     }
 
     long clampDestination(long destination, long length) {

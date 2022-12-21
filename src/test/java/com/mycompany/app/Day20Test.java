@@ -23,7 +23,7 @@ public class Day20Test {
 
     @Test
     public void clampDestination() {
-        Day20 day = new Day20();
+        Day20 day = new Day20("day-20");
         int length = 7;
         // In second negative range.
         assertEquals(4, day.clampDestination(-14, length));

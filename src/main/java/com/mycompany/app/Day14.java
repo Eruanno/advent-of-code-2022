@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Integer.parseInt;
 import static java.util.regex.Pattern.compile;
 
@@ -21,16 +20,20 @@ public class Day14 implements Day {
     private int leftInfinity = 0;
     private int rightInfinity = 0;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-14");
-        prepareData(input);
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day14(String filename) {
+        this.filename = filename;
     }
 
-    private void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    private void prepareData() {
         for (String line : input) {
             List<Point> wall = new ArrayList<>();
             Matcher coordinatesMatcher = coordinatesPattern.matcher(line);
@@ -45,7 +48,8 @@ public class Day14 implements Day {
         rightInfinity = 500 + 4 * lowestFloor;
     }
 
-    private Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         Point grain = new Point(sandSource.x, sandSource.y);
         boolean grainMoved;
         while (true) {
@@ -72,7 +76,7 @@ public class Day14 implements Day {
             grain = new Point(sandSource.x, sandSource.y);
             grainMoved = true;
         }
-        return (long) sand.size();
+        return "" + sand.size();
     }
 
     private Point calculateNextPosition(Point grain) {
@@ -109,7 +113,8 @@ public class Day14 implements Day {
         return false;
     }
 
-    private Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         wallsList.add(List.of(new Point(leftInfinity, lowestFloor + 2), new Point(rightInfinity, lowestFloor + 2)));
         lowestFloor = lowestFloor + 2;
         sand = new ArrayList<>();
@@ -128,7 +133,7 @@ public class Day14 implements Day {
                 break;
             }
         }
-        return (long) sand.size();
+        return "" + sand.size();
     }
 
     private record Point(int x, int y) {

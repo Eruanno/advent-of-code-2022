@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 
 class Day8 implements Day {
 
@@ -15,17 +14,20 @@ class Day8 implements Day {
     int height;
     int width;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-8");
-        log("Day 8:");
-        prepareData(input);
-        log("First star:");
-        log(calculateFirstStar());
-        log("Second star:");
-        log(calculateSecondStar());
+    private final String filename;
+    private List<String> input;
+
+    public Day8(String filename) {
+        this.filename = filename;
     }
 
-    void prepareData(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+        prepareData();
+    }
+
+    void prepareData() {
         height = input.size();
         width = input.get(0).length();
 
@@ -42,7 +44,8 @@ class Day8 implements Day {
         }
     }
 
-    Long calculateFirstStar() {
+    @Override
+    public String calculateFirstStar() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 visibilityMap[i][j] = checkVisibility(i, j);
@@ -55,7 +58,7 @@ class Day8 implements Day {
                     acc++;
             }
         }
-        return acc;
+        return "" + acc;
     }
 
     private boolean checkVisibility(int i, int j) {
@@ -94,15 +97,16 @@ class Day8 implements Day {
         return eVisible || wVisible || nVisible || sVisible;
     }
 
-    Long calculateSecondStar() {
+    @Override
+    public String calculateSecondStar() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 scenicMap[i][j] = calculateScenicScore(i, j);
             }
         }
-        return Arrays.stream(scenicMap)
-                     .flatMapToLong(Arrays::stream)
-                     .max().orElse(Long.MAX_VALUE);
+        return "" + Arrays.stream(scenicMap)
+                          .flatMapToLong(Arrays::stream)
+                          .max().orElse(Long.MAX_VALUE);
     }
 
     private int calculateScenicScore(int i, int j) {

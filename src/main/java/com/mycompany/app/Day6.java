@@ -4,35 +4,39 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 
 class Day6 implements Day {
+    private final String filename;
+    private List<String> input;
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-6");
-        log("Day 6:");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar(input));
+    public Day6(String filename) {
+        this.filename = filename;
     }
 
-    private Long calculateFirstStar(List<String> input) {
-        return findMarker(input.get(0), 4);
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
     }
 
-    private Long calculateSecondStar(List<String> input) {
-        return findMarker(input.get(0), 14);
+    @Override
+    public String calculateFirstStar() {
+        return findMarker(4);
     }
 
-    private Long findMarker(String message, int length) {
+    @Override
+    public String calculateSecondStar() {
+        return findMarker(14);
+    }
+
+    private String findMarker(int length) {
+        String message = input.get(0);
         for (int marker = 0; marker < message.length() - length; marker++) {
             if (message.substring(marker, marker + length).chars()
                        .distinct()
                        .count() == length) {
-                return (long) (marker + length);
+                return "" + (marker + length);
             }
         }
-        return -1L;
+        return "";
     }
 }

@@ -1,25 +1,27 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.Arrays.stream;
 
 class Day4 implements Day {
 
-    public void solve() throws IOException {
-        List<String> input = readInput("day-4");
-        log("Day 4:");
-        log("First star:");
-        log(calculateFirstStar(input));
-        log("Second star:");
-        log(calculateSecondStar(input));
+    private final String filename;
+    private List<String> input;
+
+    public Day4(String filename) {
+        this.filename = filename;
     }
 
-    private Long calculateFirstStar(List<String> input) {
+    @Override
+    public void loadData() throws IOException {
+        input = readInput(filename);
+    }
+
+    @Override
+    public String calculateFirstStar() {
         long accumulator = 0;
         for (String pair : input) {
             String[] sections = pair.split(",");
@@ -31,10 +33,11 @@ class Day4 implements Day {
                 accumulator++;
             }
         }
-        return accumulator;
+        return "" + accumulator;
     }
 
-    private Long calculateSecondStar(List<String> input) {
+    @Override
+    public String calculateSecondStar() {
         long accumulator = 0;
         for (String pair : input) {
             String[] sections = pair.split(",");
@@ -46,7 +49,7 @@ class Day4 implements Day {
                 accumulator++;
             }
         }
-        return accumulator;
+        return "" + accumulator;
     }
 
     private int[] getSection(String section) {

@@ -12,60 +12,52 @@ public class Day15Test {
     @Test
     public void calculateFirstStarTestData() throws IOException {
         // given
-        Day15 day = new Day15();
-        day.setFilename("day-15-test");
-        day.loadInput();
+        Day15 day = new Day15("day-15-test", 10, 20);
         day.prepareData();
 
         // when
-        long result = day.calculateFirstStar(10);
+        String result = day.calculateFirstStar();
 
         // then
-        assertEquals(26, result);
+        assertEquals("26", result);
     }
 
     @Test
     public void calculateFirstStarRealData() throws IOException {
         // given
-        Day15 day = new Day15();
-        day.setFilename("day-15");
-        day.loadInput();
+        Day15 day = new Day15("day-15", 2000000, 4000000);
         day.prepareData();
 
         // when
-        long result = day.calculateFirstStar(2000000);
+        String result = day.calculateFirstStar();
 
         // then
-        assertEquals(4748135, result);
+        assertEquals("4748135", result);
     }
 
     @Test
     public void calculateSecondStarTestData() throws IOException {
         // given
-        Day15 day = new Day15();
-        day.setFilename("day-15-test");
-        day.loadInput();
+        Day15 day = new Day15("day-15-test", 10, 20);
         day.prepareData();
 
         // when
-        long result = day.calculateSecondStar(20);
+        String result = day.calculateSecondStar();
 
         // then
-        assertEquals(56000011, result);
+        assertEquals("56000011", result);
     }
 
     @Test
     public void calculateSecondStarRealData() throws IOException {
         // given
-        Day15 day = new Day15();
-        day.setFilename("day-15");
-        day.loadInput();
+        Day15 day = new Day15("day-15", 2000000, 4000000);
         day.prepareData();
 
         // when
-        long result = day.calculateSecondStar(4000000);
+        String result = day.calculateSecondStar();
 
         // then
-        assertEquals(56000011, result);
+        assertEquals("56000011", result);
     }
 }

@@ -10,29 +10,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Math.*;
 
 public class Day15 implements Day {
 
     private final Pattern p = Pattern.compile("-?\\d+");
     private final List<Sensor> sensors = new ArrayList<>();
-    private String filename = "day-15";
+    private long left = Integer.MAX_VALUE;
+    private long right = Integer.MIN_VALUE;
+    private long row;
+    private long size;
+    private final String filename;
     private List<String> input;
-    long left = Integer.MAX_VALUE;
-    long right = Integer.MIN_VALUE;
 
-    public void solve() throws IOException {
-        loadInput();
-        prepareData();
-        log("First star:");
-        log(calculateFirstStar(12));
-        log("Second star:");
-        log(calculateSecondStar(20));
+    public Day15(String filename, int row, int size) {
+        this.filename = filename;
     }
 
-    void loadInput() throws IOException {
+    @Override
+    public void loadData() throws IOException {
         input = readInput(filename);
+        prepareData();
     }
 
     void prepareData() {
@@ -56,11 +54,8 @@ public class Day15 implements Day {
         }
     }
 
-    void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    Long calculateFirstStar(int row) {
+    @Override
+    public String calculateFirstStar() {
         long scannedPositionsInRow = 0;
         for (long column = left; column <= right; column++) {
             for (Sensor sensor : sensors) {
@@ -75,10 +70,11 @@ public class Day15 implements Day {
                 }
             }
         }
-        return scannedPositionsInRow;
+        return "" + scannedPositionsInRow;
     }
 
-    Long calculateSecondStar(int size) {
+    @Override
+    public String calculateSecondStar() {
         List<Point> intersections = new ArrayList<>();
         // https://fypandroid.wordpress.com/2011/07/03/how-to-calculate-the-intersection-of-two-circles-java/
         for (int i = 0; i < sensors.size() - 1; i++) {
@@ -131,10 +127,10 @@ public class Day15 implements Day {
                 }
             }
             if (!scanned) {
-                return point.x * 4000000L + point.y;
+                return "" + (point.x * 4000000L + point.y);
             }
         }
-        return -1L;
+        return "";
     }
 
     long calculateDistance(Point a, Point b) {
