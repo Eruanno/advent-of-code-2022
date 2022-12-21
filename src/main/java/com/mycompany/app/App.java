@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        Day day = new Day20();
+        Day day = new Day21();
         day.solve();
     }
 }

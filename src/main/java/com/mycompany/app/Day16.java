@@ -115,7 +115,7 @@ public class Day16 implements Day {
                     }
                 }
             }
-            long value =  timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
+            long value = timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
             log("Time: %d\t%d".formatted(time, value));
         }
         return timesUp.stream().mapToLong(DequeValve::releasedPressure).max().getAsLong();
