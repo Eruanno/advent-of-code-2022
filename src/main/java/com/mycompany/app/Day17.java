@@ -3,9 +3,14 @@ package com.mycompany.app;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
 import static com.mycompany.app.Logger.log;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 
 public class Day17 implements Day {
 
@@ -89,21 +94,26 @@ public class Day17 implements Day {
                 } else {
                     map.addAll(shape.stream().map(p -> new IPoint(p.x, p.y)).toList());
                     highestFloor = map.stream().map(p -> p.y).max(Integer::compareTo).get();
-                    while(map.size() > 100) {
+                    while (map.size() > 100) {
                         map.remove(0);
                     }
+                    findPattern();
                     shape = getNextShape();
                     shapeY = (int) (highestFloor + 4);
                     transform(shape, shapeX, shapeY);
                     i++;
-                    if (i % 100_000 == 0) {
-                        log("Number of rocks: %d".formatted(i));
-                    }
                 }
                 moveDown = false;
             }
         }
-        return highestFloor + 1;
+        return highestFloor;
+    }
+
+    private void findPattern() {
+        Map<Integer, Set<IPoint>> aaaa = map.stream().collect(groupingBy(IPoint::y, toSet()));
+        aaaa.forEach((key, value) -> {
+            log(key + " - " + value.toString());
+        });
     }
 
     private void transform(List<Point> shape, int x, int y) {
@@ -135,7 +145,7 @@ public class Day17 implements Day {
     private boolean shapeCanMoveDown(List<Point> shape) {
         for (Point point : shape) {
             if (point.y > 0) {
-                for (int i = map.size() - 1 ; i >= 0 ; i--) {
+                for (int i = map.size() - 1; i >= 0; i--) {
                     IPoint m = map.get(i);
                     if (point.x == m.x && point.y - 1 == m.y) {
                         return false;
@@ -152,7 +162,7 @@ public class Day17 implements Day {
         for (Point point : shape) {
             if (move == '<') {
                 if (point.x - 1 >= 0) {
-                    for (int i = map.size() - 1 ; i >= 0 ; i--) {
+                    for (int i = map.size() - 1; i >= 0; i--) {
                         IPoint m = map.get(i);
                         if (point.x - 1 == m.x && point.y == m.y) {
                             return false;
@@ -164,7 +174,7 @@ public class Day17 implements Day {
             }
             if (move == '>') {
                 if (point.x + 1 < 7) {
-                    for (int i = map.size() - 1 ; i >= 0 ; i--) {
+                    for (int i = map.size() - 1; i >= 0; i--) {
                         IPoint m = map.get(i);
                         if (point.x + 1 == m.x && point.y == m.y) {
                             return false;
