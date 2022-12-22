@@ -1,16 +1,12 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.lang.Math.*;
 
 public class Day15 implements Day {
@@ -47,7 +43,9 @@ public class Day15 implements Day {
             long beaconX = Long.parseLong(m.group(0));
             m.find();
             long beaconY = Long.parseLong(m.group(0));
-            Sensor sensor = new Sensor(new Point(sensorX, sensorY), new Point(beaconX, beaconY));
+            Point position = new Point(sensorX, sensorY);
+            Point beacon = new Point(beaconX, beaconY);
+            Sensor sensor = new Sensor(position, beacon, calculateDistance(position, beacon));
             sensors.add(sensor);
             left = min(left, min(sensorX, beaconX));
             right = max(right, max(sensorX, beaconX));
@@ -65,9 +63,8 @@ public class Day15 implements Day {
                 if (sensor.beacon.x == column && sensor.beacon.y == row) {
                     continue;
                 }
-                long distanceToBeacon = calculateDistance(sensor.position, sensor.beacon);
                 long distanceToCell = calculateDistance(sensor.position, new Point(column, row));
-                if (distanceToBeacon >= distanceToCell) {
+                if (sensor.distance >= distanceToCell) {
                     scannedPositionsInRow++;
                     break;
                 }
@@ -78,60 +75,41 @@ public class Day15 implements Day {
 
     @Override
     public String calculateSecondStar() {
-        List<Point> intersections = new ArrayList<>();
-        // https://fypandroid.wordpress.com/2011/07/03/how-to-calculate-the-intersection-of-two-circles-java/
-        for (int i = 0; i < sensors.size() - 1; i++) {
-            for (int j = 1; j < sensors.size(); j++) {
-                Sensor a = sensors.get(i);
-                Sensor b = sensors.get(j);
-                BigDecimal d = BigDecimal.valueOf(((a.position.x - b.position.x) * (a.position.x - b.position.x))
-                        + ((a.position.y - b.position.y) * (a.position.y - b.position.y))).sqrt(MathContext.DECIMAL64);
-                BigDecimal ra = BigDecimal.valueOf(calculateDistance(a.position, a.beacon));
-                BigDecimal rb = BigDecimal.valueOf(calculateDistance(b.position, b.beacon));
-                if (d.signum() != 0 && d.compareTo(ra.add(rb)) < 0) {
-                    BigDecimal ra2 = ra.pow(2);
-                    BigDecimal rb2 = rb.pow(2);
-                    BigDecimal d2 = d.pow(2);
-                    BigDecimal d1 = (ra2.subtract(rb2)
-                                        .add(d2)).divide(d.multiply(BigDecimal.valueOf(2)), 10, RoundingMode.HALF_DOWN);
-                    BigDecimal d12 = d1.pow(2, MathContext.DECIMAL64);
-                    log(d12.toString());
-                    BigDecimal h = ra2.subtract(d12).sqrt(MathContext.DECIMAL64);
-                    BigDecimal x3 = BigDecimal.valueOf(a.position.x)
-                                              .add(d1.multiply(BigDecimal.valueOf((b.position.x - a.position.x))))
-                                              .divide(d, 10, RoundingMode.HALF_DOWN);
-                    BigDecimal y3 = BigDecimal.valueOf(a.position.y)
-                                              .add(d1.multiply(BigDecimal.valueOf((b.position.y - a.position.y))))
-                                              .divide(d, 10, RoundingMode.HALF_DOWN);
-                    BigDecimal x4_i = x3.add(h.multiply(BigDecimal.valueOf(b.position.y - a.position.y)))
-                                        .divide(d, 10, RoundingMode.HALF_DOWN);
-                    BigDecimal y4_i = y3.subtract(h.multiply(BigDecimal.valueOf(b.position.x - a.position.x)))
-                                        .divide(d, 10, RoundingMode.HALF_DOWN);
-                    BigDecimal x4_ii = x3.subtract(h.multiply(BigDecimal.valueOf(b.position.y - a.position.y)))
-                                         .divide(d, 10, RoundingMode.HALF_DOWN);
-                    BigDecimal y4_ii = y3.add(h.multiply(BigDecimal.valueOf(b.position.x - a.position.x)))
-                                         .divide(d, 10, RoundingMode.HALF_DOWN);
-                    if (x4_i.longValue() >= 0 && y4_i.longValue() >= 0 && x4_ii.longValue() >= 0 && y4_ii.longValue() >= 0) {
-                        if (x4_i.longValue() < 4000000 && y4_i.longValue() < 4000000 && x4_ii.longValue() < 4000000 && y4_ii.longValue() < 4000000) {
-                            intersections.add(new Point(x4_i.longValue(), y4_i.longValue()));
-                            intersections.add(new Point(x4_ii.longValue(), y4_ii.longValue()));
-                        }
-                    }
+        List<Point> perimeters = new ArrayList<>();
+        for (Sensor sensor : sensors) {
+            long d = sensor.distance + 1;
+            for (long x = sensor.position.x - d, y = sensor.position.y; x <= sensor.position.x; x++, y++) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    perimeters.add(new Point(x, y));
+                }
+            }
+            for (long x = sensor.position.x, y = sensor.position.y + d; x <= sensor.position.x + d; x++, y--) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    perimeters.add(new Point(x, y));
+                }
+            }
+            for (long x = sensor.position.x + d, y = sensor.position.y + d; x <= sensor.position.x; x--, y--) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    perimeters.add(new Point(x, y));
+                }
+            }
+            for (long x = sensor.position.x, y = sensor.position.y; x <= sensor.position.x - d; x--, y++) {
+                if (x >= 0 && y >= 0 && x < size && y < size) {
+                    perimeters.add(new Point(x, y));
                 }
             }
         }
-        for (Point point : intersections) {
+        for (Point point : perimeters) {
             boolean scanned = false;
             for (Sensor sensor : sensors) {
-                long distanceToBeacon = calculateDistance(sensor.position, sensor.beacon);
-                long distanceToCell = calculateDistance(sensor.position, new Point(point.y, point.x));
-                if (distanceToBeacon >= distanceToCell) {
+                long distanceToCell = calculateDistance(sensor.position, point);
+                if (sensor.distance >= distanceToCell) {
                     scanned = true;
                     break;
                 }
             }
             if (!scanned) {
-                return "" + (point.x * size + point.y);
+                return "" + (point.x * 4_000_000 + point.y);
             }
         }
         return "";
@@ -144,7 +122,7 @@ public class Day15 implements Day {
     private record Point(long x, long y) {
     }
 
-    private record Sensor(Point position, Point beacon) {
+    private record Sensor(Point position, Point beacon, long distance) {
         @Override
         public String toString() {
             return "Sensor: %d, %d Beacon: %d, %d".formatted(position.x, position.y, beacon.x, beacon.y);

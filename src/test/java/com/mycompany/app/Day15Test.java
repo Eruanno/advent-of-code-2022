@@ -54,6 +54,6 @@ public class Day15Test {
         String result = day.calculateSecondStar();
 
         // then
-        assertEquals("56000011", result);
+        assertEquals("13743542639657", result);
     }
 }
