@@ -12,12 +12,12 @@ public class Day10 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day10(String filename) {
+    public Day10(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
         prepareData();
     }
@@ -53,7 +53,7 @@ public class Day10 implements Day {
                 if (w >= history[h * 40 + w] - 1 && w <= history[h * 40 + w] + 1) {
                     result.append('#');
                 } else {
-                    result.append('-');
+                    result.append('.');
                 }
             }
             result.append("\n");

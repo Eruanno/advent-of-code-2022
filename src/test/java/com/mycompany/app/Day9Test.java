@@ -1,59 +1,58 @@
 package com.mycompany.app;
 
-
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class Day15Test {
+public class Day9Test {
 
     @Test
     public void calculateFirstStarTestData() throws IOException {
         // given
-        Day15 day = new Day15("day-15-test", 10, 20);
+        Day9 sut = new Day9("day-9-test");
 
         // when
-        String result = day.calculateFirstStar();
+        String result = sut.calculateFirstStar();
 
         // then
-        assertEquals("26", result);
+        assertEquals("13", result);
     }
 
     @Test
     public void calculateFirstStarRealData() throws IOException {
         // given
-        Day15 day = new Day15("day-15", 2000000, 4000000);
+        Day9 sut = new Day9("day-9");
 
         // when
-        String result = day.calculateFirstStar();
+        String result = sut.calculateFirstStar();
 
         // then
-        assertEquals("4748135", result);
+        assertEquals("5874", result);
     }
 
     @Test
     public void calculateSecondStarTestData() throws IOException {
         // given
-        Day15 day = new Day15("day-15-test", 10, 20);
+        Day9 sut = new Day9("day-9-test");
 
         // when
-        String result = day.calculateSecondStar();
+        String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("56000011", result);
+        assertEquals("1", result);
     }
 
     @Test
     public void calculateSecondStarRealData() throws IOException {
         // given
-        Day15 day = new Day15("day-15", 2000000, 4000000);
+        Day9 sut = new Day9("day-9");
 
         // when
-        String result = day.calculateSecondStar();
+        String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("56000011", result);
+        assertEquals("2467", result);
     }
 }

@@ -17,12 +17,12 @@ public class Day21 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day21(String filename) {
+    public Day21(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
         prepareData();
     }
@@ -62,6 +62,11 @@ public class Day21 implements Day {
         return result;
     }
 
+    /**
+     * not 809, 810
+     *
+     * @return
+     */
     @Override
     public String calculateSecondStar() {
         Monkey root = monkeys.remove("root");
@@ -93,7 +98,7 @@ public class Day21 implements Day {
             case "+" -> result = resultA.value.add(resultB.value);
             case "-" -> result = resultA.value.subtract(resultB.value, MathContext.DECIMAL64);
             case "*" -> result = resultA.value.multiply(resultB.value);
-            case "/" -> result = resultA.value.divide(resultB.value);
+            case "/" -> result = resultA.value.divide(resultB.value, MathContext.DECIMAL64);
             case "=" -> result = resultA.value.equals(resultB.value) ? BigDecimal.ONE : BigDecimal.ZERO;
             default -> throw new IllegalStateException("Unexpected value: " + monkey.operation);
         }
@@ -129,7 +134,7 @@ public class Day21 implements Day {
         switch (operation) {
             case "+" -> result = b.subtract(a, MathContext.DECIMAL64);
             case "-" -> result = b.add(a);
-            case "*" -> result = b.divide(a);
+            case "*" -> result = b.divide(a, MathContext.DECIMAL64);
             case "/" -> result = b.multiply(a);
             default -> throw new IllegalStateException("Unexpected value: " + operation);
         }

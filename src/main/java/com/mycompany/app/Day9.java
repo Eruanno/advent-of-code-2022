@@ -14,16 +14,17 @@ public class Day9 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day9(String filename) {
+    public Day9(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
+        prepareData();
     }
 
-    private void prepareData(List<String> input) {
+    private void prepareData() {
         moves = input.stream().map(Move::new).toList();
     }
 

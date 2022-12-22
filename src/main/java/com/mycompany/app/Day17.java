@@ -23,12 +23,12 @@ public class Day17 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day17(String filename) {
+    public Day17(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
         prepareData();
     }
@@ -114,13 +114,13 @@ public class Day17 implements Day {
                 moveDown = false;
             }
         }
-        return "" + highestFloor;
+        return "" + (highestFloor + 1);
     }
 
     private void findPattern() {
         Map<Integer, Set<IPoint>> aaaa = map.stream().collect(groupingBy(IPoint::y, toSet()));
         aaaa.forEach((key, value) -> {
-            log(key + " - " + value.toString());
+            //log(key + " - " + value.toString());
         });
     }
 

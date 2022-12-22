@@ -9,12 +9,12 @@ class Day6 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day6(String filename) {
+    public Day6(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
     }
 

@@ -19,17 +19,17 @@ public class Day16 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day16(String filename) {
+    public Day16(String filename) throws IOException {
         this.filename = filename;
+        loadData();
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
         prepareData();
     }
 
-    void prepareData() {
+    private void prepareData() {
         for (String line : input) {
             Matcher pressureMatcher = pressurePattern.matcher(line);
             pressureMatcher.find();

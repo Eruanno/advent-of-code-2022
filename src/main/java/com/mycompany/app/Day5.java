@@ -49,7 +49,7 @@ class Day5 implements Day {
             {"P"}
     };
 
-    private final String[][] startingStacks = puzzleStacks;
+    private String[][] startingStacks = puzzleStacks;
 
     private final Pattern p = Pattern.compile("\\d+");
 
@@ -60,12 +60,15 @@ class Day5 implements Day {
     private final String filename;
     private List<String> input;
 
-    public Day5(String filename) {
+    public Day5(String filename, boolean test) throws IOException {
         this.filename = filename;
+        loadData();
+        if (test) {
+            startingStacks = testStacks;
+        }
     }
 
-    @Override
-    public void loadData() throws IOException {
+    private void loadData() throws IOException {
         input = readInput(filename);
         prepareData();
     }

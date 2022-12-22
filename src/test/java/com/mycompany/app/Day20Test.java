@@ -2,11 +2,61 @@ package com.mycompany.app;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 
 
 public class Day20Test {
+
+    @Test
+    public void calculateFirstStarTestData() throws IOException {
+        // given
+        Day20 sut = new Day20("day-20-test");
+
+        // when
+        String result = sut.calculateFirstStar();
+
+        // then
+        assertEquals("3", result);
+    }
+
+    @Test
+    public void calculateFirstStarRealData() throws IOException {
+        // given
+        Day20 sut = new Day20("day-20");
+
+        // when
+        String result = sut.calculateFirstStar();
+
+        // then
+        assertEquals("9687", result);
+    }
+
+    @Test
+    public void calculateSecondStarTestData() throws IOException {
+        // given
+        Day20 sut = new Day20("day-20-test");
+
+        // when
+        String result = sut.calculateSecondStar();
+
+        // then
+        assertEquals("1623178306", result);
+    }
+
+    @Test
+    public void calculateSecondStarRealData() throws IOException {
+        // given
+        Day20 sut = new Day20("day-20");
+
+        // when
+        String result = sut.calculateSecondStar();
+
+        // then
+        assertEquals(" ", result);
+    }
 
     @Test
     public void test() {
@@ -22,7 +72,7 @@ public class Day20Test {
     }
 
     @Test
-    public void clampDestination() {
+    public void clampDestination() throws IOException {
         Day20 day = new Day20("day-20");
         int length = 7;
         // In second negative range.
