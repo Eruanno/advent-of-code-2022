@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 
 import static com.mycompany.app.FileReader.readInput;
 import static java.lang.Integer.parseInt;
+import static java.lang.Math.abs;
 
 public class Day20 implements Day {
 
@@ -61,7 +62,7 @@ public class Day20 implements Day {
                 }
                 nextValueIndex++;
             }
-            long destination = clampDestination(nextValueIndex + shiftValue, encryptedFile.length);
+            long destination = clampDestinationMulti(nextValueIndex + shiftValue, encryptedFile.length);
             mixArray(nextValueIndex, destination);
 /*            log("Value: " + shiftValue + "\t" + "From: " + nextValueIndex + "\t" + "To: " + destination + "\t" + Arrays.stream(encryptedFile)
                                                                                                                        .map(a -> a[0] + "")
@@ -91,6 +92,24 @@ public class Day20 implements Day {
         } else if (result >= length) {
             while (result >= length) {
                 result += 1 - length;
+            }
+        }
+        return result;
+    }
+
+    long clampDestinationMulti(long destination, long length) {
+        long result = destination;
+        if (result < 0) {
+            long m = abs((destination - length - 1) / length) - 1;
+            result += (length - 1) * m;
+            while (result < 0) {
+                result += (length - 1);
+            }
+        } else if (result >= length) {
+            long m = ((destination + 1) / length) - 1;
+            result += (1 - length) * m;
+            while (result >= length) {
+                result += (1 - length);
             }
         }
         return result;
