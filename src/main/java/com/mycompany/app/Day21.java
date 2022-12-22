@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 
 public class Day21 implements Day {
 
@@ -122,15 +121,26 @@ public class Day21 implements Day {
         }
         BigDecimal a = monkeys.get(monkey.nameA).value;
         if (a != null) {
+            if ("/".equals(monkey.operation)) {
+                return returnValueReversed(reverseCalculation("*", value, a), monkey.nameB);
+            }
+            if ("-".equals(monkey.operation)) {
+                return returnValueReversed(reverseCalculation("+", value, a), monkey.nameB);
+            }
             return returnValueReversed(reverseCalculation(monkey.operation, a, value), monkey.nameB);
         }
         BigDecimal b = monkeys.get(monkey.nameB).value;
+        if ("+".equals(monkey.operation)) {
+            return returnValueReversed(reverseCalculation("+", b, value), monkey.nameA);
+        }
+        if ("*".equals(monkey.operation)) {
+            return returnValueReversed(reverseCalculation("*", b, value), monkey.nameA);
+        }
         return returnValueReversed(reverseCalculation(monkey.operation, value, b), monkey.nameA);
     }
 
     private BigDecimal reverseCalculation(String operation, BigDecimal a, BigDecimal b) {
         BigDecimal result;
-        log(b.toString() + " " + o(operation) + " " + a.toString());
         switch (operation) {
             case "+" -> result = b.subtract(a, MathContext.DECIMAL64);
             case "-" -> result = b.add(a);
@@ -139,19 +149,6 @@ public class Day21 implements Day {
             default -> throw new IllegalStateException("Unexpected value: " + operation);
         }
         return result;
-    }
-
-    private String o(String operation) {
-        if ("+".equals(operation)) {
-            return "-";
-        }
-        if ("-".equals(operation)) {
-            return "+";
-        }
-        if ("/".equals(operation)) {
-            return "*";
-        }
-        return "/";
     }
 
     private record Monkey(String name, BigDecimal value, String operation, String nameA, String nameB) {

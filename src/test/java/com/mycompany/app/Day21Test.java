@@ -46,6 +46,31 @@ public class Day21Test {
     }
 
     @Test
+    public void calculateSecondStarTestData2() throws IOException {
+        // given
+        Day sut = new Day21("day-21-test-2");
+
+        // when
+        String result = sut.calculateSecondStar();
+
+        // then
+        assertEquals("19", result);
+    }
+
+    @Test
+    public void calculateSecondStarTestData3() throws IOException {
+        // given
+        Day sut = new Day21("day-21-test-3");
+
+        // when
+        String result = sut.calculateSecondStar();
+
+        // then
+        assertEquals("19", result);
+    }
+
+
+    @Test
     public void calculateSecondStarRealData() throws IOException {
         // given
         Day sut = new Day21("day-21");
@@ -54,6 +79,6 @@ public class Day21Test {
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("3247317268284", result);
     }
 }
