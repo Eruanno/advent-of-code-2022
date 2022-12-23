@@ -1,24 +1,22 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
-import static com.mycompany.app.Logger.log;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
 public class Day17 implements Day {
 
+    private final Map<Integer, String> patterns = new HashMap<>();
+    private final List<List<IPoint>> shapes = new ArrayList<>();
+    private final List<IPoint> map = new ArrayList<>();
     private String jets;
     private int jet = 0;
-    private List<IPoint> map = new ArrayList<>();
     private long highestFloor = 0;
     private int shape = 0;
-    private List<List<IPoint>> shapes = new ArrayList<>();
 
     private final String filename;
     private List<String> input;
@@ -117,11 +115,45 @@ public class Day17 implements Day {
         return "" + (highestFloor + 1);
     }
 
+
     private void findPattern() {
-        Map<Integer, Set<IPoint>> aaaa = map.stream().collect(groupingBy(IPoint::y, toSet()));
-        aaaa.forEach((key, value) -> {
-            //log(key + " - " + value.toString());
-        });
+        int highest = map.stream().collect(groupingBy(IPoint::y, toSet())).entrySet()
+                         .stream()
+                         .peek(e -> patterns.put(e.getKey(), toPattern(e.getValue())))
+                         .mapToInt(Map.Entry::getKey).max().getAsInt();
+
+        long start = System.currentTimeMillis();
+        for (int i = highest; i > 1 || i > highest - 100; i--) {
+            for (int j = i - 1; j > 0; j--) {
+                if (patterns.get(i).equals(patterns.get(j))) {
+                    boolean found = true;
+                    for (int k = i; k > j; k--) {
+                        if (patterns.get(i - k).equals(patterns.get(j - k))) {
+                            continue;
+                        } else {
+                            found = false;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        System.out.printf("Pattern found from: %d to %d%n", j, i);
+                    }
+                }
+            }
+        }
+        long end = System.currentTimeMillis();
+        long time = (end - start) / 1000;
+        if (highest % 1000 > 0 && highest % 1000 < 5) {
+            System.out.println("H: %d\t%d".formatted(highest, time));
+        }
+    }
+
+    private String toPattern(Set<IPoint> points) {
+        return points.stream()
+                     .map(p -> p.x)
+                     .sorted(Integer::compareTo)
+                     .map(Object::toString)
+                     .collect(Collectors.joining());
     }
 
     private void transform(List<Point> shape, int x, int y) {
@@ -210,6 +242,9 @@ public class Day17 implements Day {
             jet = (jet + 1) % jets.length();
             return move;
         }
+    }
+
+    private record Line(long y, String pattern) {
     }
 
     private static class Point {
