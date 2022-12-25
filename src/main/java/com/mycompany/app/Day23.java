@@ -11,9 +11,11 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class Day23 implements Day {
+    private final Map<Point, List<Elf>> nextMoveProposals = new HashMap<>();
     private final List<Elf> elves = new ArrayList<>();
     private final String filename;
     private List<String> input;
+    private int order = 0;
     private int left = Integer.MAX_VALUE;
     private int right = Integer.MIN_VALUE;
     private int top = Integer.MAX_VALUE;
@@ -40,10 +42,37 @@ public class Day23 implements Day {
                 }
             }
         }
-        recalcDimensions();
     }
 
-    private void recalcDimensions() {
+    @Override
+    public String calculateFirstStar() {
+        for (int i = 0; i < 10; i++) {
+            iterate();
+        }
+        return "" + sumEmptySpaces();
+    }
+
+    private int sumEmptySpaces() {
+        recalculateDimensions();
+        int acc = 0;
+        for (int y = 0; y <= height; y++) {
+            for (int x = 0; x <= width; x++) {
+                boolean empty = true;
+                for (Elf elf : elves) {
+                    if (elf.position.x == x + left && elf.position.y == y + top) {
+                        empty = false;
+                        break;
+                    }
+                }
+                if (empty) {
+                    acc++;
+                }
+            }
+        }
+        return acc;
+    }
+
+    private void recalculateDimensions() {
         left = Integer.MAX_VALUE;
         right = Integer.MIN_VALUE;
         top = Integer.MAX_VALUE;
@@ -58,22 +87,18 @@ public class Day23 implements Day {
         height = bottom - top;
     }
 
-    Map<Point, List<Elf>> propositions = new HashMap<>();
-    int order = 0;
-
     @Override
-    public String calculateFirstStar() {
-        System.out.println("Initial state:");
-        displayMap();
-        for (int i = 0; i < 10; i++) {
+    public String calculateSecondStar() {
+        int i = 0;
+        do {
             iterate();
-        }
-        return "" + displayMap();
+            i++;
+        } while (!nextMoveProposals.isEmpty());
+        return "" + i;
     }
 
     private void iterate() {
-
-        propositions.clear();
+        nextMoveProposals.clear();
         for (Elf elf : elves) {
             if (hasToMove(elf)) {
                 Point nextMove = null;
@@ -87,7 +112,7 @@ public class Day23 implements Day {
                     } else if (isEastEmpty(elf)) {
                         nextMove = new Point(elf.position.x + 1, elf.position.y);
                     } else {
-                        nextMove = elf.position;//break?
+                        nextMove = elf.position;
                     }
                 } else if (order == 1) {
                     if (isSouthEmpty(elf)) {
@@ -99,7 +124,7 @@ public class Day23 implements Day {
                     } else if (isNorthEmpty(elf)) {
                         nextMove = new Point(elf.position.x, elf.position.y - 1);
                     } else {
-                        nextMove = elf.position;//break?
+                        nextMove = elf.position;
                     }
                 } else if (order == 2) {
                     if (isWestEmpty(elf)) {
@@ -111,7 +136,7 @@ public class Day23 implements Day {
                     } else if (isSouthEmpty(elf)) {
                         nextMove = new Point(elf.position.x, elf.position.y + 1);
                     } else {
-                        nextMove = elf.position;//break?
+                        nextMove = elf.position;
                     }
                 } else if (order == 3) {
                     if (isEastEmpty(elf)) {
@@ -123,28 +148,26 @@ public class Day23 implements Day {
                     } else if (isWestEmpty(elf)) {
                         nextMove = new Point(elf.position.x - 1, elf.position.y);
                     } else {
-                        nextMove = elf.position;//break?
+                        nextMove = elf.position;
                     }
                 }
                 List<Elf> evs;
-                if (propositions.containsKey(nextMove)) {
-                    evs = propositions.get(nextMove);
+                if (nextMoveProposals.containsKey(nextMove)) {
+                    evs = nextMoveProposals.get(nextMove);
                 } else {
                     evs = new ArrayList<>();
                 }
                 evs.add(new Elf(elf.position, nextMove));
-                propositions.put(nextMove, evs);
+                nextMoveProposals.put(nextMove, evs);
             }
         }
-        for (Map.Entry<Point, List<Elf>> entry : propositions.entrySet()) {
+        for (Map.Entry<Point, List<Elf>> entry : nextMoveProposals.entrySet()) {
             if (entry.getValue().size() == 1) {
                 elves.remove(new Elf(entry.getValue().get(0).position, null));
                 elves.add(new Elf(entry.getValue().get(0).nextMove, null));
             }
         }
         order = (order + 1) % 4;
-        recalcDimensions();
-        displayMap();
     }
 
     private boolean hasToMove(Elf elf) {
@@ -240,38 +263,6 @@ public class Day23 implements Day {
             }
         }
         return true;
-    }
-
-    private int displayMap() {
-        int acc = 0;
-        for (int y = 0; y <= height; y++) {
-            for (int x = 0; x <= width; x++) {
-                boolean drawn = false;
-                for (Elf elf : elves) {
-                    if (elf.position.x == x + left && elf.position.y == y + top) {
-                        //System.out.print('#');
-                        drawn = true;
-                        break;
-                    }
-                }
-                if (!drawn) {
-                    //System.out.print('.');
-                    acc++;
-                }
-            }
-            //System.out.println();
-        }
-        return acc;
-    }
-
-    @Override
-    public String calculateSecondStar() {
-        int i = 0;
-        do {
-            iterate();
-            i++;
-        } while (!propositions.isEmpty());
-        return "" + i;
     }
 
     private record Point(int x, int y) {
