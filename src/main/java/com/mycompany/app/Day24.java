@@ -1,20 +1,24 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
+import static java.lang.Math.min;
+import static java.util.stream.Collectors.toCollection;
 
 public class Day24 implements Day {
 
     private final String filename;
-    private final List<Blizzard> blizzards = new ArrayList<>();
+    private final Map<Integer, List<IBlizzard>> cache = new HashMap<>();
     private List<String> input;
     private int width = 0;
     private int height = 0;
-    private int eX = 0;
-    private int eY = 1;
+
+    public static void main(String[] args) throws IOException {
+        new Day24("day-24").calculateFirstStar();
+    }
 
     public Day24(String filename) throws IOException {
         this.filename = filename;
@@ -29,34 +33,62 @@ public class Day24 implements Day {
     private void prepareData() {
         height = input.size();
         width = input.get(0).length();
-        ;
+        List<IBlizzard> b = new ArrayList<>();
         for (int y = 0; y < input.size(); y++) {
             String line = input.get(y);
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 if (c == '>' || c == 'v' || c == '<' || c == '^') {
-                    blizzards.add(new Blizzard(y, x, c));
+                    //blizzards.add(new Blizzard(y, x, c));
+                    b.add(new IBlizzard(y, x, c));
                 }
             }
         }
+        cache.put(0, b);
     }
 
     @Override
     public String calculateFirstStar() {
-        displayMap();
-        int step = 0;
-        while (eX != width - 2 || eY != height - 1) {
-            // move blizzards
-            for (Blizzard b : blizzards) {
-                b.move();
+        Queue<State> toVisit = new LinkedList<>();
+        toVisit.add(new State(0, 1, 0));
+        Set<State> results = new HashSet<>();
+        int minStep = Integer.MAX_VALUE;
+        while (!toVisit.isEmpty()) {
+            State state = toVisit.poll();
+            if (toVisit.size() > 1_000_000) {
+                toVisit = toVisit.stream().sorted(((o1, o2) -> Integer.compare(width - o1.column * height - o1.row, width - o2.column * height - o2.row))).limit(200_000).collect(toCollection(LinkedList::new));
             }
-            // move expedition
-            moveExpedition();
-            step++;
-            System.out.println("After step #" + step + ":");
-            displayMap();
+            if (state.column == width - 2 && state.row == height - 1) {
+                //System.out.println("End: %d\trow: %d\tcolumn:%d".formatted(state.step, state.row, state.column));
+                results.add(state);
+                minStep = min(minStep, state.step);
+            } else if (state.step < minStep) {
+                List<IBlizzard> blizzards = getBlizzardsFromCache(state.step + 1, toVisit.size());
+                if (isFieldFree(state.row + 1, state.column, blizzards)) {
+                    toVisit.offer(new State(state.row + 1, state.column, state.step + 1));
+                }
+                if (isFieldFree(state.row, state.column + 1, blizzards)) {
+                    toVisit.offer(new State(state.row, state.column + 1, state.step + 1));
+                }
+                if (isFieldFree(state.row, state.column - 1, blizzards)) {
+                    toVisit.offer(new State(state.row, state.column - 1, state.step + 1));
+                }
+                if (isFieldFree(state.row - 1, state.column, blizzards)) {
+                    toVisit.offer(new State(state.row - 1, state.column, state.step + 1));
+                }
+                if (isFieldFree(state.row, state.column, blizzards)) {
+                    toVisit.offer(new State(state.row, state.column, state.step + 1));
+                }
+            }
         }
-        return "" + step;
+        /*for(int i = 0; i < 20; i++) {
+            List<IBlizzard> blizzards = cache.get(i);
+            for(IBlizzard blizzard : blizzards) {
+                System.out.print("[%d,%d,%c],".formatted(blizzard.row, blizzard.column, blizzard.direction));
+            }
+            System.out.println();
+        }*/
+        return "" + results.stream().mapToLong(State::step).min().getAsLong();
     }
 
     @Override
@@ -64,92 +96,68 @@ public class Day24 implements Day {
         return null;
     }
 
-    private void moveExpedition() {
-        if (isFieldFree(eX, eY + 1)) {
-            eY++;
-        } else if (isFieldFree(eX + 1, eY)) {
-            eX++;
-        } else if (isFieldFree(eX - 1, eY)) {
-            eX--;
-        } else if (isFieldFree(eX, eY - 1)) {
-            eY--;
+    private List<IBlizzard> getBlizzardsFromCache(int step, int size) {
+        if (cache.containsKey(step)) {
+            return cache.get(step);
         }
+        List<IBlizzard> previous = cache.get(step - 1);
+        List<IBlizzard> next = previous.stream().map(this::moveBlizzard).toList();
+        cache.put(step, next);
+        System.out.println(step + " " + size);
+        return next;
     }
 
-    private boolean isFieldFree(int column, int row) {
+    private IBlizzard moveBlizzard(IBlizzard blizzard) {
+        if (blizzard.direction == '^') {
+            if (blizzard.row > 1) {
+                return new IBlizzard(blizzard.row - 1, blizzard.column, blizzard.direction);
+            } else {
+                return new IBlizzard(height - 1, blizzard.column, blizzard.direction);
+            }
+        }
+        if (blizzard.direction == '>') {
+            if (blizzard.column < width - 2) {
+                return new IBlizzard(blizzard.row, blizzard.column + 1, blizzard.direction);
+            } else {
+                return new IBlizzard(blizzard.row, 1, blizzard.direction);
+            }
+        }
+        if (blizzard.direction == 'v') {
+            if (blizzard.row < height - 2) {
+                return new IBlizzard(blizzard.row + 1, blizzard.column, blizzard.direction);
+
+            } else {
+                return new IBlizzard(1, blizzard.column, blizzard.direction);
+            }
+        }
+        if (blizzard.direction == '<') {
+            if (blizzard.column > 1) {
+                return new IBlizzard(blizzard.row, blizzard.column - 1, blizzard.direction);
+            } else {
+                return new IBlizzard(blizzard.row, width - 2, blizzard.direction);
+            }
+        }
+        throw new IllegalArgumentException("Blizzard is broken.");
+    }
+
+    private boolean isFieldFree(int row, int column, List<IBlizzard> blizzards) {
+        if ((row == 0 && column == 1) || (row == height - 1 && column == width - 2)) {
+            return true;
+        }
         if (column < 1 || row < 1 || column > width - 1 || row > height - 1) {
             return false;
         }
-        for (Blizzard blizzard : blizzards) {
-            if (blizzard.c == column && blizzard.r == row) {
+        for (IBlizzard blizzard : blizzards) {
+            if (blizzard.column == column && blizzard.row == row) {
                 return false;
             }
         }
         return true;
     }
 
-    private void displayMap() {
-        for (int r = 0; r < height; r++) {
-            for (int c = 0; c < width; c++) {
-                int row = r;
-                int column = c;
-                long blizzard = blizzards.stream().filter(b -> b.r == row && b.c == column).count();
-                if (r == height - 1 && c == width - 2) {
-                    System.out.print("E");
-                } else if (r == eX && c == eY) {
-                    System.out.print("@");
-                } else if (c == 0 || r == 0 || c == width - 1 || r == height - 1) {
-                    System.out.print("#");
-                } else if (blizzard > 0) {
-                    System.out.print(blizzard);
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.println();
-        }
+    private record State(int row, int column, int step) {
     }
 
-    private class Blizzard {
-        int r;//row
-        int c;//column
-        char d;//direction
-
-        Blizzard(int row, int column, char direction) {
-            this.r = row;
-            this.c = column;
-            this.d = direction;
-        }
-
-        void move() {
-            if (d == '^') {
-                if (r > 1) {
-                    r--;
-                } else {
-                    r = height - 1;
-                }
-            }
-            if (d == '>') {
-                if (c < width - 1) {
-                    c++;
-                } else {
-                    c = 1;
-                }
-            }
-            if (d == 'v') {
-                if (r < height - 2) {
-                    r--;
-                } else {
-                    r = 1;
-                }
-            }
-            if (d == '<') {
-                if (c > 1) {
-                    c--;
-                } else {
-                    c = width - 2;
-                }
-            }
-        }
+    private record IBlizzard(int row, int column, char direction) {
     }
 }
