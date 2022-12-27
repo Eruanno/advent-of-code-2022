@@ -29,7 +29,7 @@ public class Day24Test {
         String result = sut.calculateFirstStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("203", result);
     }
 
     @Test

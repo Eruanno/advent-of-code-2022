@@ -16,9 +16,11 @@ public class Day22 implements Day {
 
     private final String filename;
     private List<String> input;
+    private boolean test = false;
 
-    public Day22(String filename) throws IOException {
+    public Day22(String filename, boolean test) throws IOException {
         this.filename = filename;
+        this.test = test;
         loadData();
     }
 
@@ -71,104 +73,99 @@ public class Day22 implements Day {
     public String calculateFirstStar() {
         int column = input.get(0).indexOf('.');
         int row = 0;
-        char facing = '>';
-        System.out.println("start:\t\t\t\tcolumn: %d\trow: %d\tfacing: %c".formatted(column, row, facing));
+        char direction = '>';
+        //System.out.println("start:\t\t\t\tcolumn: %d\trow: %d\tdirection: %c".formatted(column, row, direction));
         for (Move move : path) {
-            if (move.turn == 'R') {
-                if (facing == '>') {
-                    facing = 'v';
-                } else if (facing == 'v') {
-                    facing = '<';
-                } else if (facing == '<') {
-                    facing = '^';
-                } else {
-                    facing = '>';
-                }
-            } else if (move.turn == 'L') {
-                if (facing == '>') {
-                    facing = '^';
-                } else if (facing == 'v') {
-                    facing = '>';
-                } else if (facing == '<') {
-                    facing = 'v';
-                } else {
-                    facing = '<';
-                }
-            }
+            direction = turn(direction, move.turn);
             for (int i = 0; i < move.length; i++) {
-                if (facing == '>') {
-                    int nextColumn = nextColumn(column + 1, row, facing);
-                    if (isWall(nextColumn, row)) {
-                        break;
-                    }
-                    column = nextColumn;
-                } else if (facing == 'v') {
-                    int nextRow = nextRow(column, row + 1, facing);
-                    if (isWall(column, nextRow)) {
-                        break;
-                    }
-                    row = nextRow;
-                } else if (facing == '<') {
-                    int nextColumn = nextColumn(column - 1, row, facing);
-                    if (isWall(nextColumn, row)) {
-                        break;
-                    }
-                    column = nextColumn;
+                Position nextPosition;
+                if (direction == '>') {
+                    nextPosition = nextColumn(column + 1, row, direction);
+                } else if (direction == 'v') {
+                    nextPosition = nextRow(column, row + 1, direction);
+                } else if (direction == '<') {
+                    nextPosition = nextColumn(column - 1, row, direction);
                 } else {
-                    int nextRow = nextRow(column, row - 1, facing);
-                    if (isWall(column, nextRow)) {
-                        break;
-                    }
-                    row = nextRow;
+                    nextPosition = nextRow(column, row - 1, direction);
                 }
+                if (isWall(nextPosition)) {
+                    break;
+                }
+                row = nextPosition.row;
+                column = nextPosition.column;
+                direction = nextPosition.direction;
             }
-            System.out.println("turn: %c\tlength: %d\tcolumn: %d\trow: %d\tfacing: %c".formatted(move.turn, move.length, column, row, facing));
+            //System.out.println("turn: %c\tlength: %d\tcolumn: %d\trow: %d\tdirection: %c".formatted(move.turn, move.length, column, row, direction));
         }
-        return "" + (1000 * (row + 1) + 4 * (column + 1) + facingValue(facing));
+        return "" + (1000 * (row + 1) + 4 * (column + 1) + directionPoints(direction));
     }
 
-    private int nextColumn(int column, int row, char facing) {
-        if (column < 0 || (column < width && map[row][column] == ' ' && facing == '<')) {
+    private char turn(char direction, char turn) {
+        if (turn == 'R') {
+            if (direction == '>') {
+                return 'v';
+            } else if (direction == 'v') {
+                return '<';
+            } else if (direction == '<') {
+                return '^';
+            } else {
+                return '>';
+            }
+        } else if (turn == 'L') {
+            if (direction == '>') {
+                return '^';
+            } else if (direction == 'v') {
+                return '>';
+            } else if (direction == '<') {
+                return 'v';
+            } else {
+                return '<';
+            }
+        }
+        return direction;
+    }
+
+    private Position nextColumn(int column, int row, char direction) {
+        if (column < 0 || (column < width && map[row][column] == ' ' && direction == '<')) {
             for (int c = width - 1; c >= 0; c--) {
                 if (map[row][c] != ' ') {
-                    return c;
+                    return new Position(row, c, direction);
                 }
             }
         }
-        if (column >= width || (map[row][column] == ' ' && facing == '>')) {
+        if (column >= width || (map[row][column] == ' ' && direction == '>')) {
             for (int c = 0; c < width; c++) {
                 if (map[row][c] != ' ') {
-                    return c;
+                    return new Position(row, c, direction);
                 }
             }
         }
-        return column;
+        return new Position(row, column, direction);
     }
 
-
-    private int nextRow(int column, int row, char facing) {
-        if (row < 0 || (row < height && map[row][column] == ' ' && facing == '^')) {
+    private Position nextRow(int column, int row, char direction) {
+        if (row < 0 || (row < height && map[row][column] == ' ' && direction == '^')) {
             for (int r = height - 1; r >= 0; r--) {
                 if (map[r][column] != ' ') {
-                    return r;
+                    return new Position(r, column, direction);
                 }
             }
         }
-        if (row >= height || (map[row][column] == ' ' && facing == 'v')) {
+        if (row >= height || (map[row][column] == ' ' && direction == 'v')) {
             for (int r = 0; r < height; r++) {
                 if (map[r][column] != ' ') {
-                    return r;
+                    return new Position(r, column, direction);
                 }
             }
         }
-        return row;
+        return new Position(row, column, direction);
     }
 
-    private boolean isWall(int column, int row) {
-        return map[row][column] == '#';
+    private boolean isWall(Position position) {
+        return map[position.row][position.column] == '#';
     }
 
-    private int facingValue(char facing) {
+    private int directionPoints(char facing) {
         if (facing == '>') {
             return 0;
         } else if (facing == 'v') {
@@ -181,7 +178,368 @@ public class Day22 implements Day {
 
     @Override
     public String calculateSecondStar() {
-        return null;
+        int column = input.get(0).indexOf('.');
+        int row = 0;
+        char direction = '>';
+        System.out.println("start:\t\t\t\tcolumn: %d\trow: %d\tdirection: %c".formatted(column, row, direction));
+        for (Move move : path) {
+            direction = turn(direction, move.turn);
+            for (int i = 0; i < move.length; i++) {
+                Position nextPosition = test ? nextPositionTest(column, row, direction) : nextPosition(column, row, direction);
+                if (isWall(nextPosition)) {
+                    break;
+                }
+                row = nextPosition.row;
+                column = nextPosition.column;
+                direction = nextPosition.direction;
+            }
+            System.out.println("turn: %c\tlength: %d\tcolumn: %d\trow: %d\tdirection: %c".formatted(move.turn, move.length, column, row, direction));
+        }
+        return "" + (1000 * (row + 1) + 4 * (column + 1) + directionPoints(direction));
+    }
+
+    private Position nextPositionTest(int column, int row, char direction) {
+        if (direction == '>') {
+            if (column == width - 1 || (map[row][column + 1] == ' ')) {
+                if (row == 0) {
+                    row = 11;
+                    column = 15;
+                    direction = '<';
+                } else if (row == 1) {
+                    row = 10;
+                    column = 15;
+                    direction = '<';
+                } else if (row == 2) {
+                    row = 9;
+                    column = 15;
+                    direction = '<';
+                } else if (row == 3) {
+                    row = 8;
+                    column = 15;
+                    direction = '<';
+                } else if (row == 4) {
+                    row = 8;
+                    column = 15;
+                    direction = 'v';
+                } else if (row == 5) {
+                    row = 8;
+                    column = 14;
+                    direction = 'v';
+                } else if (row == 6) {
+                    row = 8;
+                    column = 13;
+                    direction = 'v';
+                } else if (row == 7) {
+                    row = 8;
+                    column = 12;
+                    direction = 'v';
+                } else if (row == 8) {
+                    row = 3;
+                    column = 11;
+                    direction = '<';
+                } else if (row == 9) {
+                    row = 2;
+                    column = 11;
+                    direction = '<';
+                } else if (row == 10) {
+                    row = 1;
+                    column = 11;
+                    direction = '<';
+                } else if (row == 11) {
+                    row = 0;
+                    column = 11;
+                    direction = '<';
+                }
+            } else {
+                return new Position(row, column + 1, direction);
+            }
+        } else if (direction == '<') {
+            if (column == 0 || map[row][column - 1] == ' ') {
+                if (row == 0) {
+                    row = 4;
+                    column = 4;
+                    direction = 'v';
+                } else if (row == 1) {
+                    row = 4;
+                    column = 5;
+                    direction = 'v';
+                } else if (row == 2) {
+                    row = 4;
+                    column = 6;
+                    direction = 'v';
+                } else if (row == 3) {
+                    row = 4;
+                    column = 7;
+                    direction = 'v';
+                } else if (row == 4) {
+                    row = 11;
+                    column = 15;
+                    direction = '^';
+                } else if (row == 5) {
+                    row = 11;
+                    column = 14;
+                    direction = '^';
+                } else if (row == 6) {
+                    row = 11;
+                    column = 13;
+                    direction = '^';
+                } else if (row == 7) {
+                    row = 11;
+                    column = 12;
+                    direction = '^';
+                } else if (row == 8) {
+                    row = 7;
+                    column = 7;
+                    direction = '^';
+                } else if (row == 9) {
+                    row = 7;
+                    column = 6;
+                    direction = '^';
+                } else if (row == 10) {
+                    row = 7;
+                    column = 5;
+                    direction = '^';
+                } else if (row == 11) {
+                    row = 7;
+                    column = 4;
+                    direction = '^';
+                }
+            } else {
+                return new Position(row, column - 1, direction);
+            }
+        } else if (direction == 'v') {
+            if (row == height - 1 || map[row + 1][column] == ' ') {
+                if (column == 0) {
+                    row = 11;
+                    column = 11;
+                    direction = '^';
+                } else if (column == 1) {
+                    row = 11;
+                    column = 10;
+                    direction = '^';
+                } else if (column == 2) {
+                    row = 11;
+                    column = 9;
+                    direction = '^';
+                } else if (column == 3) {
+                    row = 11;
+                    column = 8;
+                    direction = '^';
+                } else if (column == 4) {
+                    row = 11;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 5) {
+                    row = 10;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 6) {
+                    row = 9;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 7) {
+                    row = 8;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 8) {
+                    row = 7;
+                    column = 3;
+                    direction = '^';
+                } else if (column == 9) {
+                    row = 7;
+                    column = 2;
+                    direction = '^';
+                } else if (column == 10) {
+                    row = 7;
+                    column = 1;
+                    direction = '^';
+                } else if (column == 11) {
+                    row = 7;
+                    column = 0;
+                    direction = '^';
+                } else if (column == 12) {
+                    row = 4;
+                    column = 0;
+                    direction = '>';
+                } else if (column == 13) {
+                    row = 5;
+                    column = 0;
+                    direction = '>';
+                } else if (column == 14) {
+                    row = 6;
+                    column = 0;
+                    direction = '>';
+                } else if (column == 15) {
+                    row = 7;
+                    column = 0;
+                    direction = '>';
+                }
+            } else {
+                return new Position(row + 1, column, direction);
+            }
+        } else if (direction == '^') {
+            if (row == 0 || map[row - 1][column] == ' ') {
+                if (column == 0) {
+                    row = 0;
+                    column = 11;
+                    direction = 'v';
+                } else if (column == 1) {
+                    row = 0;
+                    column = 10;
+                    direction = 'v';
+                } else if (column == 2) {
+                    row = 0;
+                    column = 9;
+                    direction = 'v';
+                } else if (column == 3) {
+                    row = 0;
+                    column = 8;
+                    direction = 'v';
+                } else if (column == 4) {
+                    row = 0;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 5) {
+                    row = 1;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 6) {
+                    row = 2;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 7) {
+                    row = 3;
+                    column = 8;
+                    direction = '>';
+                } else if (column == 8) {
+                    row = 4;
+                    column = 3;
+                    direction = 'v';
+                } else if (column == 9) {
+                    row = 4;
+                    column = 2;
+                    direction = 'v';
+                } else if (column == 10) {
+                    row = 4;
+                    column = 1;
+                    direction = 'v';
+                } else if (column == 11) {
+                    row = 4;
+                    column = 0;
+                    direction = 'v';
+                } else if (column == 12) {
+                    row = 7;
+                    column = 11;
+                    direction = '<';
+                } else if (column == 13) {
+                    row = 6;
+                    column = 11;
+                    direction = '<';
+                } else if (column == 14) {
+                    row = 5;
+                    column = 11;
+                    direction = '<';
+                } else if (column == 15) {
+                    row = 4;
+                    column = 11;
+                    direction = '<';
+                }
+            } else {
+                return new Position(row - 1, column, direction);
+            }
+        }
+        return new Position(row, column, direction);
+    }
+
+    private Position nextPosition(int column, int row, char direction) {
+        int nextRow = -1;
+        int nextColumn = -1;
+        char nextDirection = '.';
+        if (direction == '>') {
+            if (column == width - 1 || (map[row][column + 1] == ' ')) {
+                if (row >= 0 && row < 50) { // B -> E
+                    nextRow = row + 100;
+                    nextColumn = 99;
+                    nextDirection = '<';
+                } else if (row >= 50 && row < 100) { // C -> B
+                    nextRow = 49;
+                    nextColumn = row + 50;
+                    nextDirection = '^';
+                } else if (row >= 100 && row < 150) { // E -> B
+                    nextRow = row - 100;
+                    nextColumn = 149;
+                    nextDirection = '<';
+                } else if (row >= 150 && row < 200) { // F -> E
+                    nextRow = 149;
+                    nextColumn = row - 100;
+                    nextDirection = '^';
+                }
+            } else {
+                return new Position(row, column + 1, direction);
+            }
+        } else if (direction == '<') {
+            if (column == 0 || map[row][column - 1] == ' ') {
+                if (row >= 0 && row < 50) { // A -> D
+                    nextRow = 149 - row;
+                    nextColumn = 0;
+                    nextDirection = '>';
+                } else if (row >= 50 && row < 100) { // C -> D
+                    nextColumn = row - 50;
+                    nextRow = 100;
+                    nextDirection = 'v';
+                } else if (row >= 100 && row < 150) { // D -> A
+                    nextRow = 149 - row;
+                    nextColumn = 50;
+                    nextDirection = '>';
+                } else if (row >= 150 && row < 200) { // F -> A
+                    nextColumn = row - 100;
+                    nextRow = 0;
+                    nextDirection = 'v';
+                }
+            } else {
+                return new Position(row, column - 1, direction);
+            }
+        } else if (direction == 'v') {
+            if (row == height - 1 || map[row + 1][column] == ' ') {
+                if (column >= 0 && column < 50) { // F -> B
+                    nextRow = 0;
+                    nextColumn = column + 100;
+                    nextDirection = 'v';
+                } else if (column >= 50 && column < 100) { // E -> F
+                    nextRow = column + 100;
+                    nextColumn = 49;
+                    nextDirection = '<';
+                } else if (column >= 100 && column < 150) { // B -> C
+                    nextRow = column - 50;
+                    nextColumn = 99;
+                    nextDirection = '<';
+                }
+            } else {
+                return new Position(row + 1, column, direction);
+            }
+        } else if (direction == '^') {
+            if (row == 0 || map[row - 1][column] == ' ') {
+                if (column >= 0 && column < 50) { // D -> C
+                    nextRow = 50 + column;
+                    nextColumn = 50;
+                    nextDirection = '>';
+                } else if (column >= 50 && column < 100) { // A -> F
+                    nextRow = column + 100;
+                    nextColumn = 0;
+                    nextDirection = '>';
+                } else if (column >= 100 && column < 150) { // B -> F
+                    nextRow = 199;
+                    nextColumn = column - 100;
+                    nextDirection = '^';
+                }
+            } else {
+                return new Position(row - 1, column, direction);
+            }
+        }
+        return new Position(nextRow, nextColumn, nextDirection);
+    }
+
+    private record Position(int row, int column, char direction) {
     }
 
     private record Move(char turn, int length) {

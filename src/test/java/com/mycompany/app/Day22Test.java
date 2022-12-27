@@ -11,7 +11,7 @@ public class Day22Test {
     @Test
     public void calculateFirstStarTestData() throws IOException {
         // given
-        Day sut = new Day22("day-22-test");
+        Day sut = new Day22("day-22-test", true);
 
         // when
         String result = sut.calculateFirstStar();
@@ -23,7 +23,7 @@ public class Day22Test {
     @Test
     public void calculateFirstStarRealData() throws IOException {
         // given
-        Day sut = new Day22("day-22");
+        Day sut = new Day22("day-22", false);
 
         // when
         String result = sut.calculateFirstStar();
@@ -35,7 +35,7 @@ public class Day22Test {
     @Test
     public void calculateSecondStarTestData() throws IOException {
         // given
-        Day sut = new Day22("day-22-test");
+        Day sut = new Day22("day-22-test", true);
 
         // when
         String result = sut.calculateSecondStar();
@@ -47,12 +47,12 @@ public class Day22Test {
     @Test
     public void calculateSecondStarRealData() throws IOException {
         // given
-        Day sut = new Day22("day-22");
+        Day sut = new Day22("day-22", false);
 
         // when
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("190117", result);
     }
 }
