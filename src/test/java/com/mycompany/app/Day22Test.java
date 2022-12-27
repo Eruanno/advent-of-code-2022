@@ -53,6 +53,6 @@ public class Day22Test {
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("190117", result);
+        assertEquals("156166", result);
     }
 }

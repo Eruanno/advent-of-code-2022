@@ -458,7 +458,7 @@ public class Day22 implements Day {
         if (direction == '>') {
             if (column == width - 1 || (map[row][column + 1] == ' ')) {
                 if (row >= 0 && row < 50) { // B -> E
-                    nextRow = row + 100;
+                    nextRow = 149 - row;
                     nextColumn = 99;
                     nextDirection = '<';
                 } else if (row >= 50 && row < 100) { // C -> B
@@ -466,7 +466,7 @@ public class Day22 implements Day {
                     nextColumn = row + 50;
                     nextDirection = '^';
                 } else if (row >= 100 && row < 150) { // E -> B
-                    nextRow = row - 100;
+                    nextRow = 149 - row;
                     nextColumn = 149;
                     nextDirection = '<';
                 } else if (row >= 150 && row < 200) { // F -> E

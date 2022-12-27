@@ -29,7 +29,7 @@ public class Day24Test {
         String result = sut.calculateFirstStar();
 
         // then
-        assertEquals("203", result);
+        assertEquals("228", result);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class Day24Test {
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("54", result);
     }
 
     @Test
@@ -53,6 +53,6 @@ public class Day24Test {
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("723", result);
     }
 }

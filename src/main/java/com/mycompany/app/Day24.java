@@ -2,11 +2,9 @@ package com.mycompany.app;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
 import static java.lang.Math.min;
-import static java.util.stream.Collectors.toCollection;
 
 public class Day24 implements Day {
 
@@ -55,45 +53,185 @@ public class Day24 implements Day {
         int minStep = Integer.MAX_VALUE;
         while (!toVisit.isEmpty()) {
             State state = toVisit.poll();
-            if (toVisit.size() > 1_000_000) {
-                toVisit = toVisit.stream().sorted(((o1, o2) -> Integer.compare(width - o1.column * height - o1.row, width - o2.column * height - o2.row))).limit(200_000).collect(toCollection(LinkedList::new));
-            }
             if (state.column == width - 2 && state.row == height - 1) {
-                //System.out.println("End: %d\trow: %d\tcolumn:%d".formatted(state.step, state.row, state.column));
                 results.add(state);
                 minStep = min(minStep, state.step);
             } else if (state.step < minStep) {
-                List<IBlizzard> blizzards = getBlizzardsFromCache(state.step + 1, toVisit.size());
+                int nextStep = state.step + 1;
+                List<IBlizzard> blizzards = getBlizzardsFromCache(nextStep, toVisit.size());
                 if (isFieldFree(state.row + 1, state.column, blizzards)) {
-                    toVisit.offer(new State(state.row + 1, state.column, state.step + 1));
+                    State nextState = new State(state.row + 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
                 }
                 if (isFieldFree(state.row, state.column + 1, blizzards)) {
-                    toVisit.offer(new State(state.row, state.column + 1, state.step + 1));
+                    State nextState = new State(state.row, state.column + 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
                 }
                 if (isFieldFree(state.row, state.column - 1, blizzards)) {
-                    toVisit.offer(new State(state.row, state.column - 1, state.step + 1));
+                    State nextState = new State(state.row, state.column - 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
                 }
                 if (isFieldFree(state.row - 1, state.column, blizzards)) {
-                    toVisit.offer(new State(state.row - 1, state.column, state.step + 1));
+                    State nextState = new State(state.row - 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
                 }
                 if (isFieldFree(state.row, state.column, blizzards)) {
-                    toVisit.offer(new State(state.row, state.column, state.step + 1));
+                    State nextState = new State(state.row, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
                 }
             }
         }
-        /*for(int i = 0; i < 20; i++) {
-            List<IBlizzard> blizzards = cache.get(i);
-            for(IBlizzard blizzard : blizzards) {
-                System.out.print("[%d,%d,%c],".formatted(blizzard.row, blizzard.column, blizzard.direction));
-            }
-            System.out.println();
-        }*/
         return "" + results.stream().mapToLong(State::step).min().getAsLong();
     }
 
     @Override
     public String calculateSecondStar() {
-        return null;
+        Queue<State> toVisit = new LinkedList<>();
+        toVisit.add(new State(0, 1, 0));
+        Set<State> results = new HashSet<>();
+        int minStep = Integer.MAX_VALUE;
+        while (!toVisit.isEmpty()) {
+            State state = toVisit.poll();
+            if (state.column == width - 2 && state.row == height - 1) {
+                results.add(state);
+                minStep = min(minStep, state.step);
+            } else if (state.step < minStep) {
+                int nextStep = state.step + 1;
+                List<IBlizzard> blizzards = getBlizzardsFromCache(nextStep, toVisit.size());
+                if (isFieldFree(state.row + 1, state.column, blizzards)) {
+                    State nextState = new State(state.row + 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column + 1, blizzards)) {
+                    State nextState = new State(state.row, state.column + 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column - 1, blizzards)) {
+                    State nextState = new State(state.row, state.column - 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row - 1, state.column, blizzards)) {
+                    State nextState = new State(state.row - 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column, blizzards)) {
+                    State nextState = new State(state.row, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+            }
+        }
+        long first = results.stream().mapToLong(State::step).min().getAsLong();
+        toVisit = new LinkedList<>();
+        toVisit.add(new State(height - 1, width - 2, (int) first));
+        results = new HashSet<>();
+        minStep = Integer.MAX_VALUE;
+        while (!toVisit.isEmpty()) {
+            State state = toVisit.poll();
+            if (state.column == 1 && state.row == 0) {
+                results.add(state);
+                minStep = min(minStep, state.step);
+            } else if (state.step < minStep) {
+                int nextStep = state.step + 1;
+                List<IBlizzard> blizzards = getBlizzardsFromCache(nextStep, toVisit.size());
+                if (isFieldFree(state.row + 1, state.column, blizzards)) {
+                    State nextState = new State(state.row + 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column + 1, blizzards)) {
+                    State nextState = new State(state.row, state.column + 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column - 1, blizzards)) {
+                    State nextState = new State(state.row, state.column - 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row - 1, state.column, blizzards)) {
+                    State nextState = new State(state.row - 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column, blizzards)) {
+                    State nextState = new State(state.row, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+            }
+        }
+        long back = results.stream().mapToLong(State::step).min().getAsLong();
+        toVisit = new LinkedList<>();
+        toVisit.add(new State(0, 1, (int) (back)));
+        results = new HashSet<>();
+        minStep = Integer.MAX_VALUE;
+        while (!toVisit.isEmpty()) {
+            State state = toVisit.poll();
+            if (state.column == width - 2 && state.row == height - 1) {
+                results.add(state);
+                minStep = min(minStep, state.step);
+            } else if (state.step < minStep) {
+                int nextStep = state.step + 1;
+                List<IBlizzard> blizzards = getBlizzardsFromCache(nextStep, toVisit.size());
+                if (isFieldFree(state.row + 1, state.column, blizzards)) {
+                    State nextState = new State(state.row + 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column + 1, blizzards)) {
+                    State nextState = new State(state.row, state.column + 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column - 1, blizzards)) {
+                    State nextState = new State(state.row, state.column - 1, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row - 1, state.column, blizzards)) {
+                    State nextState = new State(state.row - 1, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+                if (isFieldFree(state.row, state.column, blizzards)) {
+                    State nextState = new State(state.row, state.column, nextStep);
+                    if (!toVisit.contains(nextState)) {
+                        toVisit.offer(nextState);
+                    }
+                }
+            }
+        }
+        long andThereAgain = results.stream().mapToLong(State::step).min().getAsLong();
+        return "" + andThereAgain;
     }
 
     private List<IBlizzard> getBlizzardsFromCache(int step, int size) {
@@ -103,7 +241,7 @@ public class Day24 implements Day {
         List<IBlizzard> previous = cache.get(step - 1);
         List<IBlizzard> next = previous.stream().map(this::moveBlizzard).toList();
         cache.put(step, next);
-        System.out.println(step + " " + size);
+        //System.out.println(step + " " + size);
         return next;
     }
 
@@ -112,7 +250,7 @@ public class Day24 implements Day {
             if (blizzard.row > 1) {
                 return new IBlizzard(blizzard.row - 1, blizzard.column, blizzard.direction);
             } else {
-                return new IBlizzard(height - 1, blizzard.column, blizzard.direction);
+                return new IBlizzard(height - 2, blizzard.column, blizzard.direction);
             }
         }
         if (blizzard.direction == '>') {
@@ -141,18 +279,46 @@ public class Day24 implements Day {
     }
 
     private boolean isFieldFree(int row, int column, List<IBlizzard> blizzards) {
-        if ((row == 0 && column == 1) || (row == height - 1 && column == width - 2)) {
+        if ((row == 0 && column == 1) || (row == height - 1 && column == width - 2)) { // start / end
             return true;
         }
-        if (column < 1 || row < 1 || column > width - 1 || row > height - 1) {
+        if (column < 1 || row < 1 || column > width - 2 || row > height - 2) { // border
             return false;
         }
         for (IBlizzard blizzard : blizzards) {
-            if (blizzard.column == column && blizzard.row == row) {
+            if (blizzard.column == column && blizzard.row == row) { // blizzard
                 return false;
             }
         }
         return true;
+    }
+
+    private void displayMap(State state) {
+        List<IBlizzard> blizzards = cache.get(state.step);
+        for (int r = 0; r < height; r++) {
+            for (int c = 0; c < width; c++) {
+                if (r == state.row && c == state.column) {
+                    System.out.print('E');
+                } else if ((r == 0 && c == 1) || (r == height - 1 && c == width - 2)) {
+                    System.out.print('.');
+                } else if (c < 1 || r < 1 || c >= width - 1 || r >= height - 1) {
+                    System.out.print('#');
+                } else {
+                    boolean b = false;
+                    for (IBlizzard blizzard : blizzards) {
+                        if (blizzard.column == c && blizzard.row == r) {
+                            System.out.print('X');
+                            b = true;
+                            break;
+                        }
+                    }
+                    if (!b) {
+                        System.out.print('.');
+                    }
+                }
+            }
+            System.out.println();
+        }
     }
 
     private record State(int row, int column, int step) {

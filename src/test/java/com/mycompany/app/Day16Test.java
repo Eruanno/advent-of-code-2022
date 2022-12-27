@@ -29,7 +29,7 @@ public class Day16Test {
         String result = sut.calculateFirstStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("1720", result);//1hr 44m ! 951_953 states
     }
 
     @Test
@@ -41,7 +41,7 @@ public class Day16Test {
         String result = sut.calculateSecondStar();
 
         // then
-        assertEquals("", result);
+        assertEquals("1707", result);
     }
 
     @Test
