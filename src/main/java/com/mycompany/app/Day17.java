@@ -1,18 +1,18 @@
 package com.mycompany.app;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.mycompany.app.FileReader.readInput;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
 
 public class Day17 implements Day {
 
-    private final Map<Integer, String> patterns = new HashMap<>();
     private final List<List<IPoint>> shapes = new ArrayList<>();
-    private final List<IPoint> map = new ArrayList<>();
+    private List<IPoint> map = new ArrayList<>();
+    private List<Row> history = new ArrayList<>();
     private String jets;
     private int jet = 0;
     private long highestFloor = 0;
@@ -84,11 +84,14 @@ public class Day17 implements Day {
 
     private String calculate(long numberOfRocks) {
         List<Point> shape = getNextShape();
-        int shapeX = 2;
-        int shapeY = (int) (highestFloor + 3);
+        long shapeX = 2;
+        long shapeY = (int) (highestFloor + 3);
         transform(shape, shapeX, shapeY);
         boolean moveDown = false;
+        boolean warped = false;
         char move = getNextMove(moveDown);
+        long previousDeltaRocks = 0;
+        long previousDeltaHeight = 0;
         for (long i = 0; i < numberOfRocks; ) {
             if (!moveDown) {
                 moveShape(shape, move);
@@ -98,14 +101,36 @@ public class Day17 implements Day {
                 if (shapeCanMoveDown(shape)) {
                     moveShapeDown(shape);
                 } else {
+                    Optional<Row> row = history.stream()
+                                               .filter(r -> r.jetIndex == jet)
+                                               .sorted((a, b) -> Math.toIntExact(b.height - a.height))
+                                               .findFirst();
+                    if (this.shape == 0) {
+                        history.add(new Row(i, jet, highestFloor));
+                    }
                     map.addAll(shape.stream().map(p -> new IPoint(p.x, p.y)).toList());
-                    highestFloor = map.stream().map(p -> p.y).max(Integer::compareTo).get();
+                    highestFloor = map.stream().map(p -> p.y).max(Long::compareTo).get();
+                    if (!warped && row.isPresent()) {
+                        long deltaRocks = i - row.get().totalRocks;
+                        long deltaHeight = highestFloor - row.get().height;
+                        if (previousDeltaRocks == deltaRocks && previousDeltaHeight == deltaHeight) {
+                            long delta = (numberOfRocks - i) / deltaRocks;
+                            i = i + delta * deltaRocks;
+                            highestFloor = highestFloor + delta * deltaHeight;
+                            map = map.stream()
+                                     .map(p -> new IPoint(p.x, p.y + delta * deltaHeight))
+                                     .collect(Collectors.toList());
+                            warped = true;
+                        } else {
+                            previousDeltaRocks = deltaRocks;
+                            previousDeltaHeight = deltaHeight;
+                        }
+                    }
                     while (map.size() > 100) {
                         map.remove(0);
                     }
-                    findPattern();
                     shape = getNextShape();
-                    shapeY = (int) (highestFloor + 4);
+                    shapeY = highestFloor + 4;
                     transform(shape, shapeX, shapeY);
                     i++;
                 }
@@ -115,48 +140,7 @@ public class Day17 implements Day {
         return "" + (highestFloor + 1);
     }
 
-
-    private void findPattern() {
-        int highest = map.stream().collect(groupingBy(IPoint::y, toSet())).entrySet()
-                         .stream()
-                         .peek(e -> patterns.put(e.getKey(), toPattern(e.getValue())))
-                         .mapToInt(Map.Entry::getKey).max().getAsInt();
-
-        long start = System.currentTimeMillis();
-        for (int i = highest; i > 1 || i > highest - 100; i--) {
-            for (int j = i - 1; j > 0; j--) {
-                if (patterns.get(i).equals(patterns.get(j))) {
-                    boolean found = true;
-                    for (int k = i; k > j; k--) {
-                        if (patterns.get(i - k).equals(patterns.get(j - k))) {
-                            continue;
-                        } else {
-                            found = false;
-                            break;
-                        }
-                    }
-                    if (found) {
-                        System.out.printf("Pattern found from: %d to %d%n", j, i);
-                    }
-                }
-            }
-        }
-        long end = System.currentTimeMillis();
-        long time = (end - start) / 1000;
-        if (highest % 1000 > 0 && highest % 1000 < 5) {
-            System.out.println("H: %d\t%d".formatted(highest, time));
-        }
-    }
-
-    private String toPattern(Set<IPoint> points) {
-        return points.stream()
-                     .map(p -> p.x)
-                     .sorted(Integer::compareTo)
-                     .map(Object::toString)
-                     .collect(Collectors.joining());
-    }
-
-    private void transform(List<Point> shape, int x, int y) {
+    private void transform(List<Point> shape, long x, long y) {
         for (Point point : shape) {
             point.x += x;
             point.y += y;
@@ -244,14 +228,11 @@ public class Day17 implements Day {
         }
     }
 
-    private record Line(long y, String pattern) {
-    }
-
     private static class Point {
-        private int x;
-        private int y;
+        private long x;
+        private long y;
 
-        Point(int x, int y) {
+        Point(long x, long y) {
             this.x = x;
             this.y = y;
         }
@@ -262,10 +243,13 @@ public class Day17 implements Day {
         }
     }
 
-    private record IPoint(int x, int y) {
+    private record IPoint(long x, long y) {
         @Override
         public String toString() {
             return "[%d:%d]".formatted(x, y);
         }
+    }
+
+    private record Row(long totalRocks, int jetIndex, long height) {
     }
 }
