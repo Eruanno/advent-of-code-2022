@@ -53,23 +53,32 @@ public class Day19 implements Day {
 
     @Override
     public String calculateFirstStar() {
-        return "" + blueprints.parallelStream().mapToLong(b -> findMacQualityNumberRecursive(b, 24)).sum();
+        return "" + blueprints.parallelStream().mapToLong(this::findMaxQualityNumber).sum();
+    }
+
+    private Long findMaxQualityNumber(Blueprint blueprint) {
+        State initialState = new State(0, 0, 0, 0, 0, 1, 0, 0, 0);
+        long start = System.currentTimeMillis();
+        long result = blueprint.id * findRecursive(blueprint, initialState, 24);
+        long end = System.currentTimeMillis();
+        // System.out.println("#%d :\t%d\tTime: %d".formatted(blueprint.id, result, (end - start) / 1000));
+        return result;
     }
 
     @Override
     public String calculateSecondStar() {
         return "" + blueprints.parallelStream()
                               .filter(b -> b.id < 4)
-                              .mapToLong(b -> findMacQualityNumberRecursive(b, 32))
+                              .mapToLong(this::findMaxNumberOfGeodes)
                               .reduce((a, b) -> a * b).getAsLong();
     }
 
-    private Long findMacQualityNumberRecursive(Blueprint blueprint, int time) {
+    private Long findMaxNumberOfGeodes(Blueprint blueprint) {
         State initialState = new State(0, 0, 0, 0, 0, 1, 0, 0, 0);
-        long start = System.currentTimeMillis();
-        long result = blueprint.id * findRecursive(blueprint, initialState, time);
-        long end = System.currentTimeMillis();
-        System.out.println("#%d :\t%d\tTime: %d".formatted(blueprint.id, result, (end - start) / 1000));
+        //long start = System.currentTimeMillis();
+        long result = findRecursive(blueprint, initialState, 32);
+        //long end = System.currentTimeMillis();
+        // System.out.println("#%d :\t%d\tTime: %d".formatted(blueprint.id, result, (end - start) / 1000));
         return result;
     }
 
@@ -79,51 +88,33 @@ public class Day19 implements Day {
             return state.geode + state.geodeRobots;
         }
         // Create.
-        Set<State> states = new HashSet<>(5);
-        int t = time - state.time;
+        Set<State> states = new HashSet<>(0);
+        int remainingTime = time - state.time;
         int nextTime = state.time + 1;
+        int nextOre = state.ore + state.oreRobots;
+        int nextClay = state.clay + state.clayRobots;
+        int nextObsidian = state.obsidian + state.obsidianRobots;
+        int nextGeode = state.geode + state.geodeRobots;
         // Ore robots.
-        if (state.ore >= blueprint.oreRobotCostOre && state.oreRobots * t + state.ore < t * blueprint.maxRobotCostOre) {
-            int newOre = state.ore + state.oreRobots - blueprint.oreRobotCostOre;
-            int newClay = state.clay + state.clayRobots;
-            int newObsidian = state.obsidian + state.obsidianRobots;
-            int newGeode = state.geode + state.geodeRobots;
-            int newOreRobots = state.oreRobots + 1;
-            states.add(new State(nextTime, newOre, newClay, newObsidian, newGeode, newOreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+        if ((state.ore >= blueprint.oreRobotCostOre) && (state.oreRobots * remainingTime + state.ore < remainingTime * blueprint.maxRobotCostOre)) {
+            states.add(new State(nextTime, nextOre - blueprint.oreRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots + 1, state.clayRobots, state.obsidianRobots, state.geodeRobots));
         }
         // Clay robots.
-        if (state.ore >= blueprint.clayRobotCostOre && state.clayRobots * t + state.clay < t * blueprint.obsidianRobotCostClay) {
-            int newOre = state.ore + state.oreRobots - blueprint.clayRobotCostOre;
-            int newClay = state.clay + state.clayRobots;
-            int newObsidian = state.obsidian + state.obsidianRobots;
-            int newGeode = state.geode + state.geodeRobots;
-            int newClayRobots = state.clayRobots + 1;
-            states.add(new State(nextTime, newOre, newClay, newObsidian, newGeode, state.oreRobots, newClayRobots, state.obsidianRobots, state.geodeRobots));
+        if ((state.ore >= blueprint.clayRobotCostOre) && (state.clayRobots * remainingTime + state.clay < remainingTime * blueprint.obsidianRobotCostClay)) {
+            states.add(new State(nextTime, nextOre - blueprint.clayRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots + 1, state.obsidianRobots, state.geodeRobots));
         }
         // Obsidian robots.
-        if (state.ore >= blueprint.obsidianRobotCostOre && state.clay >= blueprint.obsidianRobotCostClay && state.obsidianRobots * t + state.obsidian < t * blueprint.geodeRobotCostObsidian) {
-            int newOre = state.ore + state.oreRobots - blueprint.obsidianRobotCostOre;
-            int newClay = state.clay + state.clayRobots - blueprint.obsidianRobotCostClay;
-            int newObsidian = state.obsidian + state.obsidianRobots;
-            int newGeode = state.geode + state.geodeRobots;
-            int newObsidianRobots = state.obsidianRobots + 1;
-            states.add(new State(nextTime, newOre, newClay, newObsidian, newGeode, state.oreRobots, state.clayRobots, newObsidianRobots, state.geodeRobots));
+        if ((state.ore >= blueprint.obsidianRobotCostOre && state.clay >= blueprint.obsidianRobotCostClay) && (state.obsidianRobots * remainingTime + state.obsidian < remainingTime * blueprint.geodeRobotCostObsidian)) {
+            states.add(new State(nextTime, nextOre - blueprint.obsidianRobotCostOre, nextClay - blueprint.obsidianRobotCostClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots + 1, state.geodeRobots));
         }
         // Geode robots.
         if (state.ore >= blueprint.geodeRobotCostOre && state.obsidian >= blueprint.geodeRobotCostObsidian) {
-            int newOre = state.ore + state.oreRobots - blueprint.geodeRobotCostOre;
-            int newClay = state.clay + state.clayRobots;
-            int newObsidian = state.obsidian + state.obsidianRobots - blueprint.geodeRobotCostObsidian;
-            int newGeode = state.geode + state.geodeRobots;
-            int newGeodeRobots = state.geodeRobots + 1;
-            states.add(new State(nextTime, newOre, newClay, newObsidian, newGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, newGeodeRobots));
+            states.add(new State(nextTime, nextOre - blueprint.geodeRobotCostOre, nextClay, nextObsidian - blueprint.geodeRobotCostObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots + 1));
         }
         // Do nothing.
-        int newOre = state.ore + state.oreRobots;
-        int newClay = state.clay + state.clayRobots;
-        int newObsidian = state.obsidian + state.obsidianRobots;
-        int newGeode = state.geode + state.geodeRobots;
-        states.add(new State(nextTime, newOre, newClay, newObsidian, newGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+        if (states.isEmpty()) { // size < 3 is good for 1st star test/real data, empty is good for 2nd real data
+            states.add(new State(nextTime, nextOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+        }
         // Make next step.
         return states.parallelStream()
                      .map(s -> findRecursive(blueprint, s, time))
