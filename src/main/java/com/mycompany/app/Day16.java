@@ -6,6 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mycompany.app.FileReader.readInput;
+import static java.lang.Math.max;
+import static java.util.Arrays.stream;
+import static java.util.Collections.disjoint;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
 
@@ -156,8 +159,31 @@ public class Day16 implements Day {
 
     @Override
     public String calculateFirstStar() {
+        calculatePaths(30);
+        return "" + maxPressure.values().stream().mapToInt(Integer::intValue).max().getAsInt();
+    }
+
+    @Override
+    public String calculateSecondStar() {
+        calculatePaths(26);
+        int maxSum = 0;
+        for (Map.Entry<String, Integer> e1 : maxPressure.entrySet()) {
+            for (Map.Entry<String, Integer> e2 : maxPressure.entrySet()) {
+                if (!e1.getKey().equals(e2.getKey())) {
+                    String[] v1 = e1.getKey().split(",");
+                    String[] v2 = e2.getKey().split(",");
+                    if (disjoint(stream(v1).toList(), stream(v2).toList())) {
+                        maxSum = max(maxSum, e1.getValue() + e2.getValue());
+                    }
+                }
+            }
+        }
+        return "" + maxSum;
+    }
+
+    private void calculatePaths(int time) {
         Queue<State> queue = new LinkedList<>();
-        queue.offer(new State("AA", 30, 0, ""));
+        queue.offer(new State("AA", time, 0, ""));
         while (!queue.isEmpty()) {
             State state = queue.poll();
             List<Edge> edges = allEdges.stream()
@@ -174,12 +200,6 @@ public class Day16 implements Day {
                 updateRelief(openedValves, totalRelief);
             }
         }
-        return "" + maxPressure.values().stream().mapToInt(Integer::intValue).max().getAsInt();
-    }
-
-    @Override
-    public String calculateSecondStar() {
-        return "";
     }
 
     private void updateRelief(String openedValves, int totalRelief) {
