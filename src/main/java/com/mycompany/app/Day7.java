@@ -48,7 +48,7 @@ class Day7 implements Day {
                 if (args[0].startsWith("dir")) {
                     currentNode.children.add(new Node(new FileNode(DIR, args[1], -1), currentNode, new ArrayList<>()));
                 } else {
-                    currentNode.children.add(new Node(new FileNode(FILE, args[1], Integer.parseInt(args[0])), currentNode, new ArrayList<>()));
+                    currentNode.children.add(new Node(new FileNode(FILE, args[1], Long.parseLong(args[0])), currentNode, new ArrayList<>()));
                 }
             }
         }

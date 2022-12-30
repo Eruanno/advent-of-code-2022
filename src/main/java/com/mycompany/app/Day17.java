@@ -11,12 +11,12 @@ import static com.mycompany.app.FileReader.readInput;
 public class Day17 implements Day {
 
     private final List<List<IPoint>> shapes = new ArrayList<>();
-    private List<IPoint> map = new ArrayList<>();
-    private List<Row> history = new ArrayList<>();
+    private final List<Row> history = new ArrayList<>();
+    private List<IPoint> tower = new ArrayList<>();
     private String jets;
-    private int jet = 0;
+    private int jetIndex = 0;
+    private int shapeIndex = 0;
     private long highestFloor = 0;
-    private int shape = 0;
 
     private final String filename;
     private List<String> input;
@@ -85,14 +85,14 @@ public class Day17 implements Day {
     private String calculate(long numberOfRocks) {
         List<Point> shape = getNextShape();
         long shapeX = 2;
-        long shapeY = (int) (highestFloor + 3);
+        long shapeY = highestFloor + 3;
         transform(shape, shapeX, shapeY);
         boolean moveDown = false;
         boolean warped = false;
         char move = getNextMove(moveDown);
         long previousDeltaRocks = 0;
         long previousDeltaHeight = 0;
-        for (long i = 0; i < numberOfRocks; ) {
+        for (long currentRock = 0; currentRock < numberOfRocks; ) {
             if (!moveDown) {
                 moveShape(shape, move);
                 move = getNextMove(moveDown);
@@ -102,37 +102,37 @@ public class Day17 implements Day {
                     moveShapeDown(shape);
                 } else {
                     Optional<Row> row = history.stream()
-                                               .filter(r -> r.jetIndex == jet)
+                                               .filter(r -> r.jetIndex == jetIndex)
                                                .sorted((a, b) -> Math.toIntExact(b.height - a.height))
                                                .findFirst();
-                    if (this.shape == 0) {
-                        history.add(new Row(i, jet, highestFloor));
+                    if (this.shapeIndex == 0) {
+                        history.add(new Row(currentRock, jetIndex, highestFloor));
                     }
-                    map.addAll(shape.stream().map(p -> new IPoint(p.x, p.y)).toList());
-                    highestFloor = map.stream().map(p -> p.y).max(Long::compareTo).get();
+                    tower.addAll(shape.stream().map(p -> new IPoint(p.x, p.y)).toList());
+                    highestFloor = tower.stream().map(p -> p.y).max(Long::compareTo).get();
                     if (!warped && row.isPresent()) {
-                        long deltaRocks = i - row.get().totalRocks;
+                        long deltaRocks = currentRock - row.get().totalRocks;
                         long deltaHeight = highestFloor - row.get().height;
                         if (previousDeltaRocks == deltaRocks && previousDeltaHeight == deltaHeight) {
-                            long delta = (numberOfRocks - i) / deltaRocks;
-                            i = i + delta * deltaRocks;
+                            long delta = (numberOfRocks - currentRock) / deltaRocks;
+                            currentRock = currentRock + delta * deltaRocks;
                             highestFloor = highestFloor + delta * deltaHeight;
-                            map = map.stream()
-                                     .map(p -> new IPoint(p.x, p.y + delta * deltaHeight))
-                                     .collect(Collectors.toList());
+                            tower = tower.stream()
+                                         .map(p -> new IPoint(p.x, p.y + delta * deltaHeight))
+                                         .collect(Collectors.toList());
                             warped = true;
                         } else {
                             previousDeltaRocks = deltaRocks;
                             previousDeltaHeight = deltaHeight;
                         }
                     }
-                    while (map.size() > 100) {
-                        map.remove(0);
+                    while (tower.size() > 100) {
+                        tower.remove(0);
                     }
                     shape = getNextShape();
                     shapeY = highestFloor + 4;
                     transform(shape, shapeX, shapeY);
-                    i++;
+                    currentRock++;
                 }
                 moveDown = false;
             }
@@ -147,13 +147,13 @@ public class Day17 implements Day {
         }
     }
 
-    private void moveShape(List<Point> shape, char move) {
-        if (shapeCanMove(shape, move)) {
+    private void moveShape(List<Point> shape, char direction) {
+        if (shapeCanMove(shape, direction)) {
             for (Point point : shape) {
-                if (move == '<') {
+                if (direction == '<') {
                     point.x -= 1;
                 }
-                if (move == '>') {
+                if (direction == '>') {
                     point.x += 1;
                 }
             }
@@ -169,8 +169,8 @@ public class Day17 implements Day {
     private boolean shapeCanMoveDown(List<Point> shape) {
         for (Point point : shape) {
             if (point.y > 0) {
-                for (int i = map.size() - 1; i >= 0; i--) {
-                    IPoint m = map.get(i);
+                for (int i = tower.size() - 1; i >= 0; i--) {
+                    IPoint m = tower.get(i);
                     if (point.x == m.x && point.y - 1 == m.y) {
                         return false;
                     }
@@ -182,12 +182,12 @@ public class Day17 implements Day {
         return true;
     }
 
-    private boolean shapeCanMove(List<Point> shape, char move) {
+    private boolean shapeCanMove(List<Point> shape, char direction) {
         for (Point point : shape) {
-            if (move == '<') {
+            if (direction == '<') {
                 if (point.x - 1 >= 0) {
-                    for (int i = map.size() - 1; i >= 0; i--) {
-                        IPoint m = map.get(i);
+                    for (int i = tower.size() - 1; i >= 0; i--) {
+                        IPoint m = tower.get(i);
                         if (point.x - 1 == m.x && point.y == m.y) {
                             return false;
                         }
@@ -196,10 +196,10 @@ public class Day17 implements Day {
                     return false;
                 }
             }
-            if (move == '>') {
+            if (direction == '>') {
                 if (point.x + 1 < 7) {
-                    for (int i = map.size() - 1; i >= 0; i--) {
-                        IPoint m = map.get(i);
+                    for (int i = tower.size() - 1; i >= 0; i--) {
+                        IPoint m = tower.get(i);
                         if (point.x + 1 == m.x && point.y == m.y) {
                             return false;
                         }
@@ -213,8 +213,8 @@ public class Day17 implements Day {
     }
 
     private List<Point> getNextShape() {
-        List<IPoint> nextShape = shapes.get(shape);
-        shape = (shape + 1) % shapes.size();
+        List<IPoint> nextShape = shapes.get(shapeIndex);
+        shapeIndex = (shapeIndex + 1) % shapes.size();
         return nextShape.stream().map(p -> new Point(p.x, p.y)).toList();
     }
 
@@ -222,8 +222,8 @@ public class Day17 implements Day {
         if (moveDown) {
             return 'v';
         } else {
-            char move = jets.charAt(jet);
-            jet = (jet + 1) % jets.length();
+            char move = jets.charAt(jetIndex);
+            jetIndex = (jetIndex + 1) % jets.length();
             return move;
         }
     }
@@ -236,18 +236,9 @@ public class Day17 implements Day {
             this.x = x;
             this.y = y;
         }
-
-        @Override
-        public String toString() {
-            return "[%d:%d]".formatted(x, y);
-        }
     }
 
     private record IPoint(long x, long y) {
-        @Override
-        public String toString() {
-            return "[%d:%d]".formatted(x, y);
-        }
     }
 
     private record Row(long totalRocks, int jetIndex, long height) {

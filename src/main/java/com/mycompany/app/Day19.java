@@ -58,11 +58,7 @@ public class Day19 implements Day {
 
     private Long findMaxQualityNumber(Blueprint blueprint) {
         State initialState = new State(0, 0, 0, 0, 0, 1, 0, 0, 0);
-        long start = System.currentTimeMillis();
-        long result = blueprint.id * findRecursive(blueprint, initialState, 24);
-        long end = System.currentTimeMillis();
-        // System.out.println("#%d :\t%d\tTime: %d".formatted(blueprint.id, result, (end - start) / 1000));
-        return result;
+        return blueprint.id * findRecursive(blueprint, initialState, 24);
     }
 
     @Override
@@ -75,11 +71,7 @@ public class Day19 implements Day {
 
     private Long findMaxNumberOfGeodes(Blueprint blueprint) {
         State initialState = new State(0, 0, 0, 0, 0, 1, 0, 0, 0);
-        //long start = System.currentTimeMillis();
-        long result = findRecursive(blueprint, initialState, 32);
-        //long end = System.currentTimeMillis();
-        // System.out.println("#%d :\t%d\tTime: %d".formatted(blueprint.id, result, (end - start) / 1000));
-        return result;
+        return findRecursive(blueprint, initialState, 32);
     }
 
     private long findRecursive(Blueprint blueprint, State state, int time) {
@@ -112,7 +104,7 @@ public class Day19 implements Day {
             states.add(new State(nextTime, nextOre - blueprint.geodeRobotCostOre, nextClay, nextObsidian - blueprint.geodeRobotCostObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots + 1));
         }
         // Do nothing.
-        if (states.isEmpty()) { // size < 3 is good for 1st star test/real data, empty is good for 2nd real data
+        if (states.isEmpty()) { // Size < 3 is good for 1st star test/real data, empty is good for 2nd real data.
             states.add(new State(nextTime, nextOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
         }
         // Make next step.

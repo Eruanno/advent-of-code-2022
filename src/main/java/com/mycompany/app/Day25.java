@@ -5,10 +5,15 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static com.mycompany.app.FileReader.readInput;
-import static java.lang.Math.pow;
 import static java.math.BigInteger.*;
 
 public class Day25 implements Day {
+
+    private final BigInteger MINUS_TWO = valueOf(-2);
+    private final BigInteger MINUS_ONE = valueOf(-1);
+    private final BigInteger THREE = valueOf(3);
+    private final BigInteger FOUR = valueOf(4);
+    private final BigInteger FIVE = valueOf(5);
 
     private final String filename;
     private List<String> input;
@@ -20,60 +25,16 @@ public class Day25 implements Day {
 
     private void loadData() throws IOException {
         input = readInput(filename);
-        prepareData();
-    }
-
-    private void prepareData() {
-
     }
 
     @Override
     public String calculateFirstStar() {
-        BigInteger sum = ZERO;
-        for (String line : input) {
-            sum = sum.add(snafuToDecimal(line));
-        }
-        return sum.toString();
+        return decimalToSnafu(input.stream().map(this::snafuToDecimal).reduce(BigInteger::add).get());
     }
 
     @Override
     public String calculateSecondStar() {
         return null;
-    }
-
-    String decimalToSnafu(BigInteger number) {
-        //String input = number.toString();
-        StringBuilder result = new StringBuilder();
-        /*for (int i = 0; i < input.length(); i++) {
-            String digit = String.valueOf(input.charAt(input.length() - 1 - i));
-            result.append(translateDigit(new BigInteger(digit)));
-        }*/
-        int mag = 0;
-        double num = 0;
-        while (num < number.longValue()) {
-            mag++;
-            num = pow(5, mag);
-        }
-        return result.reverse().toString();
-    }
-
-    private String translateDigit(BigInteger digit) {
-        if (digit.equals(valueOf(-2))) {
-            return "=";
-        } else if (digit.equals(valueOf(-1))) {
-            return "-";
-        } else if (digit.equals(ZERO)) {
-            return "0";
-        } else if (digit.equals(ONE)) {
-            return "1";
-        } else if (digit.equals(TWO)) {
-            return "2";
-        } /*else if (digit.equals(valueOf(3))) {
-            return "1=";
-        } else if (digit.equals(valueOf(4))) {
-            return "1-";
-        }*/
-        throw new NumberFormatException("");
     }
 
     BigInteger snafuToDecimal(String number) {
@@ -87,15 +48,41 @@ public class Day25 implements Day {
 
     private BigInteger translateDigit(char digit) {
         if (digit == '=') {
-            return valueOf(-2);
+            return MINUS_TWO;
         } else if (digit == '-') {
-            return valueOf(-1);
+            return MINUS_ONE;
         } else if (digit == '0') {
             return ZERO;
         } else if (digit == '1') {
             return ONE;
-        } else {
+        } else if (digit == '2') {
             return TWO;
         }
+        throw new NumberFormatException("");
+    }
+
+    String decimalToSnafu(BigInteger number) {
+        StringBuilder result = new StringBuilder();
+        while (!number.equals(ZERO)) {
+            number = number.add(TWO);
+            result.append(translateDigit(number.remainder(FIVE)));
+            number = number.divide(FIVE);
+        }
+        return result.reverse().toString();
+    }
+
+    private String translateDigit(BigInteger digit) {
+        if (digit.equals(ZERO)) {
+            return "=";
+        } else if (digit.equals(ONE)) {
+            return "-";
+        } else if (digit.equals(TWO)) {
+            return "0";
+        } else if (digit.equals(THREE)) {
+            return "1";
+        } else if (digit.equals(FOUR)) {
+            return "2";
+        }
+        throw new NumberFormatException("");
     }
 }
