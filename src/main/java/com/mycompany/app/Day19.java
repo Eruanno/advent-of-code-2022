@@ -79,7 +79,7 @@ public class Day19 implements Day {
         if (state.time == time - 1) {
             return state.geode + state.geodeRobots;
         }
-        // Create.
+        // Build.
         Set<State> states = new HashSet<>(0);
         int remainingTime = time - state.time;
         int nextTime = state.time + 1;
@@ -87,25 +87,31 @@ public class Day19 implements Day {
         int nextClay = state.clay + state.clayRobots;
         int nextObsidian = state.obsidian + state.obsidianRobots;
         int nextGeode = state.geode + state.geodeRobots;
-        // Ore robots.
-        if ((state.ore >= blueprint.oreRobotCostOre) && (state.oreRobots * remainingTime + state.ore < remainingTime * blueprint.maxRobotCostOre)) {
-            states.add(new State(nextTime, nextOre - blueprint.oreRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots + 1, state.clayRobots, state.obsidianRobots, state.geodeRobots));
-        }
-        // Clay robots.
-        if ((state.ore >= blueprint.clayRobotCostOre) && (state.clayRobots * remainingTime + state.clay < remainingTime * blueprint.obsidianRobotCostClay)) {
-            states.add(new State(nextTime, nextOre - blueprint.clayRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots + 1, state.obsidianRobots, state.geodeRobots));
-        }
-        // Obsidian robots.
-        if ((state.ore >= blueprint.obsidianRobotCostOre && state.clay >= blueprint.obsidianRobotCostClay) && (state.obsidianRobots * remainingTime + state.obsidian < remainingTime * blueprint.geodeRobotCostObsidian)) {
-            states.add(new State(nextTime, nextOre - blueprint.obsidianRobotCostOre, nextClay - blueprint.obsidianRobotCostClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots + 1, state.geodeRobots));
-        }
         // Geode robots.
         if (state.ore >= blueprint.geodeRobotCostOre && state.obsidian >= blueprint.geodeRobotCostObsidian) {
             states.add(new State(nextTime, nextOre - blueprint.geodeRobotCostOre, nextClay, nextObsidian - blueprint.geodeRobotCostObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots + 1));
-        }
-        // Do nothing.
-        if (states.isEmpty()) { // Size < 3 is good for 1st star test/real data, empty is good for 2nd real data.
-            states.add(new State(nextTime, nextOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+        } else {
+            // Ore robots.
+            if ((state.ore >= blueprint.oreRobotCostOre) && (state.oreRobots * remainingTime + state.ore < remainingTime * blueprint.maxRobotCostOre)) {
+                states.add(new State(nextTime, nextOre - blueprint.oreRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots + 1, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+            }
+            // Clay robots.
+            if ((state.ore >= blueprint.clayRobotCostOre) && (state.clayRobots * remainingTime + state.clay < remainingTime * blueprint.obsidianRobotCostClay)) {
+                states.add(new State(nextTime, nextOre - blueprint.clayRobotCostOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots + 1, state.obsidianRobots, state.geodeRobots));
+            }
+            // Obsidian robots.
+            if ((state.ore >= blueprint.obsidianRobotCostOre && state.clay >= blueprint.obsidianRobotCostClay) && (state.obsidianRobots * remainingTime + state.obsidian < remainingTime * blueprint.geodeRobotCostObsidian)) {
+                states.add(new State(nextTime, nextOre - blueprint.obsidianRobotCostOre, nextClay - blueprint.obsidianRobotCostClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots + 1, state.geodeRobots));
+            }
+            // Do nothing.
+            // | size | *t | *r | **t | **r |
+            // |------|----|----|-----|-----|
+            // | 0    | x  | x  | x   | v   |
+            // | 1    | v  | x  | v   | v   |
+            // | 2    | v  | v  | v   | v   |
+            if (states.size() < 2) {
+                states.add(new State(nextTime, nextOre, nextClay, nextObsidian, nextGeode, state.oreRobots, state.clayRobots, state.obsidianRobots, state.geodeRobots));
+            }
         }
         // Make next step.
         return states.parallelStream()

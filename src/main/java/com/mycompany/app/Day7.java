@@ -41,7 +41,7 @@ class Day7 implements Day {
                                                       .findAny()
                                                       .get();
                 }
-            } else if (command.equals("$ ls")) { // List all the filenodes.
+            } else if (command.equals("$ ls")) { // List all the file nodes.
                 // Do nothing.
             } else { // ls output.
                 String[] args = command.split(" ");
@@ -65,7 +65,7 @@ class Day7 implements Day {
 
     @Override
     public String calculateFirstStar() {
-        return "" + root.children.stream().mapToLong(this::calculateDirectorySize).sum();
+        return "" + calculateDirectorySize(root);
     }
 
     private long calculateDirectorySize(Node currentNode) {
@@ -87,10 +87,7 @@ class Day7 implements Day {
         long updateSize = 30_000_000;
         long occupiedSpace = root.data.size;
         long neededSpace = occupiedSpace - (totalDiscSpace - updateSize);
-        return "" + root.children.stream()
-                                 .mapToLong(node -> findSmallestDirectoryToDelete(node, neededSpace))
-                                 .min()
-                                 .orElse(-1L);
+        return "" + findSmallestDirectoryToDelete(root, neededSpace);
     }
 
     private long findSmallestDirectoryToDelete(Node currentNode, long size) {

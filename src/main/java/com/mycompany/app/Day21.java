@@ -11,7 +11,7 @@ import static com.mycompany.app.FileReader.readInput;
 
 public class Day21 implements Day {
 
-    Map<String, Monkey> monkeys = new HashMap<>();
+    private final Map<String, Monkey> monkeys = new HashMap<>();
 
     private final String filename;
     private List<String> input;
@@ -61,11 +61,6 @@ public class Day21 implements Day {
         return result;
     }
 
-    /**
-     * not 809, 810
-     *
-     * @return
-     */
     @Override
     public String calculateSecondStar() {
         Monkey root = monkeys.remove("root");

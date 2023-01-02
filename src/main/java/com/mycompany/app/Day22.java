@@ -16,7 +16,7 @@ public class Day22 implements Day {
 
     private final String filename;
     private List<String> input;
-    private boolean test = false;
+    private boolean test;
 
     public Day22(String filename, boolean test) throws IOException {
         this.filename = filename;
@@ -74,7 +74,6 @@ public class Day22 implements Day {
         int column = input.get(0).indexOf('.');
         int row = 0;
         char direction = '>';
-        //System.out.println("start:\t\t\t\tcolumn: %d\trow: %d\tdirection: %c".formatted(column, row, direction));
         for (Move move : path) {
             direction = turn(direction, move.turn);
             for (int i = 0; i < move.length; i++) {
@@ -95,7 +94,6 @@ public class Day22 implements Day {
                 column = nextPosition.column;
                 direction = nextPosition.direction;
             }
-            //System.out.println("turn: %c\tlength: %d\tcolumn: %d\trow: %d\tdirection: %c".formatted(move.turn, move.length, column, row, direction));
         }
         return "" + (1000 * (row + 1) + 4 * (column + 1) + directionPoints(direction));
     }
@@ -181,7 +179,6 @@ public class Day22 implements Day {
         int column = input.get(0).indexOf('.');
         int row = 0;
         char direction = '>';
-        System.out.println("start:\t\t\t\tcolumn: %d\trow: %d\tdirection: %c".formatted(column, row, direction));
         for (Move move : path) {
             direction = turn(direction, move.turn);
             for (int i = 0; i < move.length; i++) {
@@ -193,7 +190,6 @@ public class Day22 implements Day {
                 column = nextPosition.column;
                 direction = nextPosition.direction;
             }
-            System.out.println("turn: %c\tlength: %d\tcolumn: %d\trow: %d\tdirection: %c".formatted(move.turn, move.length, column, row, direction));
         }
         return "" + (1000 * (row + 1) + 4 * (column + 1) + directionPoints(direction));
     }

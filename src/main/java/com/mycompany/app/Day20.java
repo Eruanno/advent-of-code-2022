@@ -29,13 +29,6 @@ public class Day20 implements Day {
         encryptedFile = new long[input.size()][2];
     }
 
-    private void resetData(long key) {
-        for (int i = 0; i < input.size(); i++) {
-            encryptedFile[i][0] = parseInt(input.get(i)) * key;
-            encryptedFile[i][1] = i;
-        }
-    }
-
     @Override
     public String calculateFirstStar() {
         resetData(1L);
@@ -50,8 +43,14 @@ public class Day20 implements Day {
         return calculateCoordinates();
     }
 
+    private void resetData(long key) {
+        for (int i = 0; i < input.size(); i++) {
+            encryptedFile[i][0] = parseInt(input.get(i)) * key;
+            encryptedFile[i][1] = i;
+        }
+    }
+
     private void mixFile() {
-        //log(Arrays.stream(encryptedFile).map(a -> a[0] + "").collect(joining(", ")));
         for (int i = 0; i < encryptedFile.length; i++) {
             long nextValueIndex = 0;
             long shiftValue = -1;
@@ -62,42 +61,12 @@ public class Day20 implements Day {
                 }
                 nextValueIndex++;
             }
-            long destination = clampDestinationMulti(nextValueIndex + shiftValue, encryptedFile.length);
+            long destination = clampDestination(nextValueIndex + shiftValue, encryptedFile.length);
             mixArray(nextValueIndex, destination);
-/*            log("Value: " + shiftValue + "\t" + "From: " + nextValueIndex + "\t" + "To: " + destination + "\t" + Arrays.stream(encryptedFile)
-                                                                                                                       .map(a -> a[0] + "")
-                                                                                                                       .collect(joining(", ")));*/
         }
     }
 
-    private String calculateCoordinates() {
-        int index = -1;
-        for (int i = 0; i < encryptedFile.length; i++) {
-            if (encryptedFile[i][0] == 0) {
-                index = i;
-            }
-        }
-        long ONE = encryptedFile[((1000 % encryptedFile.length) + index) % encryptedFile.length][0];
-        long TWO = encryptedFile[((2000 % encryptedFile.length) + index) % encryptedFile.length][0];
-        long THREE = encryptedFile[((3000 % encryptedFile.length) + index) % encryptedFile.length][0];
-        return "" + (ONE + TWO + THREE);
-    }
-
-    long clampDestination(long destination, long length) {
-        long result = destination;
-        if (result < 0) {
-            while (result < 0) {
-                result += length - 1;
-            }
-        } else if (result >= length) {
-            while (result >= length) {
-                result += 1 - length;
-            }
-        }
-        return result;
-    }
-
-    long clampDestinationMulti(long destination, long length) {
+    private long clampDestination(long destination, long length) {
         long result = destination;
         if (result < 0) {
             long m = abs((destination - length - 1) / length) - 1;
@@ -115,7 +84,7 @@ public class Day20 implements Day {
         return result;
     }
 
-    void mixArray(long from, long to) {
+    private void mixArray(long from, long to) {
         long tmpValue = encryptedFile[(int) from][0];
         long tmpIndex = encryptedFile[(int) from][1];
         if (from < to) {
@@ -131,5 +100,18 @@ public class Day20 implements Day {
         }
         encryptedFile[(int) to][0] = tmpValue;
         encryptedFile[(int) to][1] = tmpIndex;
+    }
+
+    private String calculateCoordinates() {
+        int index = -1;
+        for (int i = 0; i < encryptedFile.length; i++) {
+            if (encryptedFile[i][0] == 0) {
+                index = i;
+            }
+        }
+        long ONE = encryptedFile[((1000 % encryptedFile.length) + index) % encryptedFile.length][0];
+        long TWO = encryptedFile[((2000 % encryptedFile.length) + index) % encryptedFile.length][0];
+        long THREE = encryptedFile[((3000 % encryptedFile.length) + index) % encryptedFile.length][0];
+        return "" + (ONE + TWO + THREE);
     }
 }
